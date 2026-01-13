@@ -4,69 +4,139 @@ from config import *
 from jugador import Jugador
 from bandera import Bandera
 
-#Clase principal del juego
+# Clase principal del juego
 class Juego:
     def __init__(self):
-        #Inicializamos el juego
+        # Inicializamos el juego
         pygame.init()
         self.pantalla = pygame.display.set_mode((ANCHO, ALTO))
         pygame.display.set_caption(TITULO)
         self.reloj = pygame.time.Clock()
         self.ejecutando = True
+        
+        # Cargar obstaculos desde config
+        self.obstaculos = OBSTACULOS
+        # Diccionario de jugadores
+        self.jugadores = {}
+        
+        # Definimos quiénes somos (por defecto el 1/Rojo para pruebas locales)
+        self.mi_id = 1 
         self.crear_objetos()
 
-    #Creamos los objetos del juego
+    # Creamos los objetos del juego
     def crear_objetos(self):
-        self.j_rojo = Jugador(20, ALTO//2 - 20, ROJO, TECLAS_ROJO)
-        self.j_azul = Jugador(ANCHO - 60, ALTO//2 - 20, AZUL, TECLAS_AZUL)
         self.bandera = Bandera()
+        
+        # Configuracion multijugador
+        # Lista con datos: (ID, Posición X, Posición Y, Color)
+        # Usamos ANCHO-80 y ALTO-80 para que no nazcan pegados al borde exacto
+        datos_jugadores = [
+            (1, 40, 40, ROJO),             # P1: Rojo (Esq. Sup. Izq)
+            (2, ANCHO-80, 40, AZUL),       # P2: Azul (Esq. Sup. Der)
+            (3, 40, ALTO-80, AMARILLO),    # P3: Amarillo (Esq. Inf. Izq)
+            (4, ANCHO-80, ALTO-80, VERDE)  # P4: Verde (Esq. Inf. Der)
+        ]
 
-    #Manjeamos los eventos del juego de salida
+        for pid, x, y, color in datos_jugadores:
+            # Determinamos si este jugador es el usuario local
+            es_local = (pid == self.mi_id)
+            # Instanciamos el jugador
+            jugador = Jugador(x, y, color, pid, es_local)
+            
+            # Solo asignamos controles si es el jugador local
+            if es_local:
+                jugador.controles = TECLAS_LOCAL 
+            # Lo guardamos en el diccionario
+            self.jugadores[pid] = jugador
+
+    # Manejamos los eventos del juego de salida
     def manejar_eventos(self):
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 self.ejecutando = False
 
-    #Actualizamos el estado del juego
+    # Actualizamos el estado del juego
     def actualizar(self):
-        self.j_rojo.mover()
-        self.j_azul.mover()
-        self.bandera.actualizar(self.j_rojo, self.j_azul)
-        self.j_rojo.intentar_robar(self.j_azul, self.bandera)
-        self.j_azul.intentar_robar(self.j_rojo, self.bandera)
+        # MOVER JUGADORES
+        for jugador in self.jugadores.values():
+            # Pasamos la lista de obstáculos para colisiones
+            jugador.mover(self.obstaculos)
+
+        # Actualizar Bandera
+        lista_jugadores = list(self.jugadores.values())
+        # Si nadie la tiene, verificamos si alguien la toca
+        if self.bandera.portador is None:
+            for j in lista_jugadores:
+                if self.bandera.rect.colliderect(j.rect):
+                    self.bandera.portador = j
+                    break # Solo uno la coge a la vez
+        
+        # Si alguien la tiene, actualizamos su posición 
+        if self.bandera.portador:
+            self.bandera.rect.center = self.bandera.portador.rect.center
+
+        # Verificacion de robos
+        for j1 in lista_jugadores:
+            for j2 in lista_jugadores:
+                if j1 != j2:
+                    j1.robar(j2, self.bandera)
+
+        # Verificacion de puntos
         self.verificar_puntos()
 
-    #Verificar si algún jugador ha anotado
+    # Verificar si algún jugador ha anotado
     def verificar_puntos(self):
-        if self.bandera.portador == self.j_rojo and self.j_rojo.rect.colliderect(BASE_ROJA_RECT):
-            self.j_rojo.puntos += 1
-            self.resetear_ronda()
-        elif self.bandera.portador == self.j_azul and self.j_azul.rect.colliderect(BASE_AZUL_RECT):
-            self.j_azul.puntos += 1
-            self.resetear_ronda()
+        portador = self.bandera.portador
+        
+        if portador:
+            anoto_punto = False
+            
+            # Verificamos colisión con la base correspondiente según el ID
+            if portador.id == 1 and portador.rect.colliderect(BASE_ROJA):
+                anoto_punto = True
+            elif portador.id == 2 and portador.rect.colliderect(BASE_AZUL):
+                anoto_punto = True
+            elif portador.id == 3 and portador.rect.colliderect(BASE_AMARILLA):
+                anoto_punto = True
+            elif portador.id == 4 and portador.rect.colliderect(BASE_VERDE):
+                anoto_punto = True
+            # Si anotó, incrementamos puntos y reseteamos ronda
+            if anoto_punto:
+                portador.puntos += 1
+                print(f"¡Jugador {portador.id} ({portador.color}) anotó un punto!")
+                self.resetear_ronda()
 
-    #Funcion para resetear la ronda
+    # Funcion para resetear la ronda
     def resetear_ronda(self):
         self.bandera.reiniciar()
-        self.j_rojo.reiniciar_posicion()
-        self.j_azul.reiniciar_posicion()
+        # Reiniciamos a TODOS los jugadores
+        for jugador in self.jugadores.values():
+            jugador.reiniciar_posicion()
 
-    #Dibujamos todos los elementos en la pantalla
+    # Dibujamos todos los elementos en la pantalla
     def dibujar(self):
         self.pantalla.fill(BLANCO)
-        pygame.draw.rect(self.pantalla, COLOR_BASEROJA, BASE_ROJA_RECT)
-        pygame.draw.rect(self.pantalla, COLOR_BASEAZUL, BASE_AZUL_RECT)
-        pygame.draw.line(self.pantalla, (220, 220, 220), (ANCHO//2, 0), (ANCHO//2, ALTO), 2)
+        
+        # Dibujar Obstáculos
+        for muro in self.obstaculos:
+            pygame.draw.rect(self.pantalla, GRIS, muro)
 
-        #Dibujamos jugadores y bandera
-        self.j_rojo.dibujar(self.pantalla)
-        self.j_azul.dibujar(self.pantalla)
+        # Dibujo las 4 Bases 
+        pygame.draw.rect(self.pantalla, COLOR_BASE_ROJA, BASE_ROJA)
+        pygame.draw.rect(self.pantalla, COLOR_BASE_AZUL, BASE_AZUL)
+        pygame.draw.rect(self.pantalla, COLOR_BASE_AMARILLA, BASE_AMARILLA)
+        pygame.draw.rect(self.pantalla, COLOR_BASE_VERDE, BASE_VERDE)
+
+        # Dibujar jugadores
+        for jugador in self.jugadores.values():
+            jugador.dibujar(self.pantalla)
+            
         self.bandera.dibujar(self.pantalla)
 
         # Actualizamos la pantalla
         pygame.display.flip()
 
-    #Funcion que arranca el juego
+    # Funcion que arranca el juego
     def correr(self):
         while self.ejecutando:
             self.manejar_eventos()

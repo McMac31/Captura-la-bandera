@@ -3,35 +3,54 @@ from config import *
 
 #Clase Jugador
 class Jugador:
-    def __init__(self, x, y, color, controles):
-        # Inicializamos atributos del jugador
+    # Inicializamos clase jugador y atributos
+    def __init__(self, x, y, color, id_jugador, es_local=False):
         self.rect = pygame.Rect(x, y, 40, 40)
         self.color = color
-        self.controles = controles
-        self.velocidad = 6
-        self.puntos = 0 #Punrtuacion del jugador
-        # Guardamos posición inicial
+        self.velocidad = 5
+        self.puntos = 0 # Puntos del jugador
         self.inicio_x = x
         self.inicio_y = y
+        # Atributos para red
+        self.id = id_jugador # Identificador único del jugador
+        self.es_local = es_local  # True si soy yo, False si es otro cliente
+        self.controles = None     # Se asignarán solo si es local
 
-    # Función para mover al jugador
-    def mover(self):
+    def mover(self, lista_obstaculos):
+        # SOLO nos movemos por teclado si somos el jugador local
+        if not self.es_local or not self.controles:
+            return
+        #Inicializamos variables de movimiento
         teclas = pygame.key.get_pressed()
-        if teclas[self.controles['arriba']] and self.rect.top > 0:
-            self.rect.y -= self.velocidad
-        if teclas[self.controles['abajo']] and self.rect.bottom < ALTO:
-            self.rect.y += self.velocidad
-        if teclas[self.controles['izq']] and self.rect.left > 0:
-            self.rect.x -= self.velocidad
-        if teclas[self.controles['der']] and self.rect.right < ANCHO:
-            self.rect.x += self.velocidad
+        dx, dy = 0, 0 #Dirección del movimiento
 
-    # Función para reiniciar la posición del jugador
+        #Lista de controles
+        if teclas[self.controles['arriba']]: dy = -self.velocidad
+        if teclas[self.controles['abajo']]:  dy = self.velocidad
+        if teclas[self.controles['izq']]:    dx = -self.velocidad
+        if teclas[self.controles['der']]:    dx = self.velocidad
+
+        # Movimiento en X con colisiones
+        self.rect.x += dx
+        if self.rect.left < 0 or self.rect.right > ANCHO or self.rect.collidelist(lista_obstaculos) != -1: # Colisión
+            self.rect.x -= dx # Deshacer si choca
+
+        # Movimiento en Y con colisiones
+        self.rect.y += dy
+        if self.rect.top < 0 or self.rect.bottom > ALTO or self.rect.collidelist(lista_obstaculos) != -1: # Colisión
+            self.rect.y -= dy # Deshacer si choca
+
+    # Método para actualizar posición cuando llega dato del Servidor
+    def establecer_posicion(self, x, y):
+        self.rect.x = x
+        self.rect.y = y
+
+    #Funcion para reiniciar la posicion del jugador
     def reiniciar_posicion(self):
         self.rect.topleft = (self.inicio_x, self.inicio_y)
     
-    #Función para intentar robar la bandera al enemigo
-    def intentar_robar(self, enemigo, bandera):
+    #Funcion para robar la bandera
+    def robar(self, enemigo, bandera):
         # Lógica de intercepción de la bandera
         if self.rect.colliderect(enemigo.rect):
             if bandera.portador == enemigo:
@@ -40,7 +59,7 @@ class Jugador:
                 self.reiniciar_posicion()
                 enemigo.reiniciar_posicion()
 
-    # Función para dibujar al jugador
+    #Funcion para dibujar el jugador
     def dibujar(self, pantalla):
         pygame.draw.rect(pantalla, self.color, self.rect)
         pygame.draw.rect(pantalla, NEGRO, self.rect, 2)

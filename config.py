@@ -1,26 +1,50 @@
 import pygame
 
-#  Configuración de Pantalla
+# --- Configuración de Pantalla ---
 ANCHO = 800
 ALTO = 600
-TITULO = "Captura la Bandera"
+TITULO = "Captura la Bandera - 4 Jugadores"
 FPS = 60
 
-# Colores 
+# --- Colores ---
 BLANCO = (255, 255, 255)
 NEGRO = (0, 0, 0)
+GRIS = (200, 200, 200)
+VERDE_BANDERA = (50, 200, 50) # Diferenciamos el verde de la bandera
+
+# Colores de Jugadores
 ROJO = (200, 50, 50)
 AZUL = (50, 50, 200)
-VERDE = (50, 200, 50)
-GRIS = (200, 200, 200)
-COLOR_BASEROJA = (254, 120, 118)
-COLOR_BASEAZUL = (114, 106, 235)
+AMARILLO = (220, 220, 50)
+VERDE = (50, 180, 50)
 
-# Rectángulos
-# Creamos los rectángulos aquí para usarlos en el juego
-BASE_ROJA_RECT = pygame.Rect(0, 0, 100, ALTO)
-BASE_AZUL_RECT = pygame.Rect(ANCHO - 100, 0, 100, ALTO)
+# Colores de Bases
+COLOR_BASE_ROJA = (255, 150, 150)
+COLOR_BASE_AZUL = (150, 150, 255)
+COLOR_BASE_AMARILLA = (255, 255, 150)
+COLOR_BASE_VERDE = (150, 230, 150)
 
-# Controles 
-TECLAS_ROJO = {'arriba': pygame.K_w, 'abajo': pygame.K_s, 'izq': pygame.K_a, 'der': pygame.K_d}
-TECLAS_AZUL = {'arriba': pygame.K_UP, 'abajo': pygame.K_DOWN, 'izq': pygame.K_LEFT, 'der': pygame.K_RIGHT}
+# Definición de Bases
+TAMANO_BASE = 80 # Bases cuadradas de 80x80
+BASE_ROJA = pygame.Rect(0, 0, TAMANO_BASE, TAMANO_BASE)                    # Esquina Superior Izquierda
+BASE_AZUL = pygame.Rect(ANCHO - TAMANO_BASE, 0, TAMANO_BASE, TAMANO_BASE)  # Esquina Superior Derecha
+BASE_AMARILLA= pygame.Rect(0, ALTO - TAMANO_BASE, TAMANO_BASE, TAMANO_BASE) # Esquina Inferior Izquierda
+BASE_VERDE = pygame.Rect(ANCHO - TAMANO_BASE, ALTO - TAMANO_BASE, TAMANO_BASE, TAMANO_BASE) # Esquina Inferior Derecha
+
+# Obstáculos 
+OBSTACULOS = [
+    pygame.Rect(200, 100, 20, 400),   # Muro vertical izquierdo
+    pygame.Rect(580, 100, 20, 400),   # Muro vertical derecho
+    pygame.Rect(300, 290, 200, 20),   # Muro central horizontal
+    pygame.Rect(100, 400, 80, 20),    # Obstáculo extra izquierda
+    pygame.Rect(620, 200, 80, 20)     # Obstáculo extra derecha
+]
+
+# Controles Jugador local
+TECLAS_LOCAL = {'arriba': pygame.K_w, 'abajo': pygame.K_s, 'izq': pygame.K_a, 'der': pygame.K_d}
+
+#Configuracion de red
+
+SERVIDOR_IP = "127.0.0.1" #Local para pruebas (SE CAMBIARA LUEGO A LA IP DEL SERVIDOR)
+PUERTO=8000
+DIRECCION_SERVIDOR = (SERVIDOR_IP, PUERTO)
