@@ -1,0 +1,12 @@
+# Archivos compilados de Python
+__pycache__/
+*.pyc
+
+# (Opcional) Si usas entorno virtual
+venv/
+env/
+
+# (Opcional) Archivos de sistema o IDEs
+.DS_Store
+.vscode/
+.idea/
