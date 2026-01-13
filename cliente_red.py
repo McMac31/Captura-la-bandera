@@ -32,7 +32,7 @@ class ClienteRed:
                 self.conectado = True
                 print(f"[RED] Conectado al servidor con ID: {self.id}")
                 
-                thread = threading.Thread(target=self._escuchar_servidor)
+                thread = threading.Thread(target=self.escuchar_servidor)
                 thread.daemon = True 
                 thread.start()
                 return True
