@@ -3,6 +3,7 @@ import sys
 from config import *
 from jugador import Jugador
 from bandera import Bandera
+from cliente_red import ClienteRed
 
 # Clase principal del juego
 class Juego:
@@ -13,7 +14,13 @@ class Juego:
         pygame.display.set_caption(TITULO)
         self.reloj = pygame.time.Clock()
         self.ejecutando = True
-        
+        self.red=ClienteRed()
+        if self.red.conectar():
+            print("Conectado al servidor de juego.")
+            self.mi_id=self.red.id
+        else:
+            print("No se pudo conectar al servidor de juego.")
+
         # Cargar obstaculos desde config
         self.obstaculos = OBSTACULOS
         # Diccionario de jugadores
@@ -31,10 +38,10 @@ class Juego:
         # Lista con datos: (ID, Posición X, Posición Y, Color)
         # Usamos ANCHO-80 y ALTO-80 para que no nazcan pegados al borde exacto
         datos_jugadores = [
-            (1, 40, 40, ROJO),             # P1: Rojo (Esq. Sup. Izq)
-            (2, ANCHO-80, 40, AZUL),       # P2: Azul (Esq. Sup. Der)
-            (3, 40, ALTO-80, AMARILLO),    # P3: Amarillo (Esq. Inf. Izq)
-            (4, ANCHO-80, ALTO-80, VERDE)  # P4: Verde (Esq. Inf. Der)
+            (1, 40, 40, ROJO),             # J1: Rojo (Esq. Sup. Izq)
+            (2, ANCHO-80, 40, AZUL),       # J2: Azul (Esq. Sup. Der)
+            (3, 40, ALTO-80, AMARILLO),    # J3: Amarillo (Esq. Inf. Izq)
+            (4, ANCHO-80, ALTO-80, VERDE)  # J4: Verde (Esq. Inf. Der)
         ]
 
         for pid, x, y, color in datos_jugadores:
@@ -57,13 +64,33 @@ class Juego:
 
     # Actualizamos el estado del juego
     def actualizar(self):
-        # MOVER JUGADORES
-        for jugador in self.jugadores.values():
-            # Pasamos la lista de obstáculos para colisiones
-            jugador.mover(self.obstaculos)
+        #Control de red: procesar mensajes entrantes
+        if self.mi_id in self.jugadores:
+            jugador_local= self.jugadores[self.mi_id]
 
-        # Actualizar Bandera
+            #Guardado de posicion anterior
+            pos_anterior=(jugador_local.rect.x, jugador_local.rect.y)
+            jugador_local.mover(self.obstaculos) #Movimiento local
+
+            if (jugador_local.rect.x, jugador_local.rect.y) != pos_anterior: #Si hubo cambio de posicion
+                datos={
+                    'id': self.mi_id,
+                    'posicion':{"x": jugador_local.rect.x, "y": jugador_local.rect.y}}
+                self.red.enviar(datos) #Envio de nueva posicion al servidor
+                
+            #Recepcion de datos del servidor
+            mensajes=self.red.obtener_mensajes()
+            for mensaje in mensajes:
+                if "posicion" in mensaje and "id"in mensaje: #Mensaje de posicion de otro jugador
+                    id_remoto=mensaje['id']
+                    if id_remoto != self.mi_id and id_remoto in self.jugadores: #Si no soy yo y conozco al jugador
+                        pos= mensaje['posicion']
+                        self.jugadores[id_remoto].establecer_posicion(pos['x'], pos['y']) #Actualizacion de posicion remota
+        
+        # Lista jugadores 
         lista_jugadores = list(self.jugadores.values())
+
+
         # Si nadie la tiene, verificamos si alguien la toca
         if self.bandera.portador is None:
             for j in lista_jugadores:

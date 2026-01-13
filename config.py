@@ -45,6 +45,6 @@ TECLAS_LOCAL = {'arriba': pygame.K_w, 'abajo': pygame.K_s, 'izq': pygame.K_a, 'd
 
 #Configuracion de red
 
-SERVIDOR_IP = "127.0.0.1" #Local para pruebas (SE CAMBIARA LUEGO A LA IP DEL SERVIDOR)
+SERVIDOR_IP = "192.168.24.219" #IP de mi pc en la red local
 PUERTO=8000
 DIRECCION_SERVIDOR = (SERVIDOR_IP, PUERTO)
