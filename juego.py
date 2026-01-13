@@ -27,7 +27,6 @@ class Juego:
         self.jugadores = {}
         
         # Definimos quiénes somos (por defecto el 1/Rojo para pruebas locales)
-        self.mi_id = 1 
         self.crear_objetos()
 
     # Creamos los objetos del juego
