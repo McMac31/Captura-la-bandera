@@ -8,6 +8,7 @@ class Bandera:
         self.rect = pygame.Rect(0, 0, 30, 30)
         self.rect.center = (ANCHO // 2, ALTO // 2)
         self.portador = None
+        self.capturada = False
 
     #Funcion para que la bandera vuelva a la posicion inicial
     def reiniciar(self):
@@ -18,10 +19,13 @@ class Bandera:
     def actualizar(self, jugador_rojo, jugador_azul):
         # Si nadie la tiene, comprobar si alguien la toca
         if self.portador is None:
+            self.capturada = False
             if self.rect.colliderect(jugador_rojo.rect): #Si el jugador rojo la toca
                 self.portador = jugador_rojo
+                self.capturada = True
             elif self.rect.colliderect(jugador_azul.rect):#Si el jugador azul la toca
                 self.portador = jugador_azul
+                self.capturada = True
         
         # Si alguien la tiene, seguirlo
         else:
