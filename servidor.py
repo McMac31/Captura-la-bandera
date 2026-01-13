@@ -22,67 +22,66 @@ class Servidor:
     
     #Funcion para manejar a un cliente
     def manejar_cliente(self, conexion, direccion, id_jugador):
-        #Hilo individual para gestionar a UN cliente.
-        print(f"[NUEVA CONEXIÓN] {direccion} conectado. Asignado ID: {id_jugador}")
-        conectado= True
+        print(f"[CONEXIÓN] {direccion} ID: {id_jugador}")
+        buffer = ""
         try:
-            while conectado:
-                # Esperar mensaje del cliente
-                msg = conexion.recv(2048).decode("utf-8")
-                if not msg:
-                    break
-                # Procesar JSON
-                data = json.loads(msg)
-                
-                # Protocolo simple: Si recibo datos, los actualizo en mi "base de datos"
-                if "posicion" in data:
-                    self.jugadores_info[id_jugador] = data["posicion"]
+            while True:
+                datos_recibidos = conexion.recv(2048).decode("utf-8")
+                if not datos_recibidos: break
+                buffer += datos_recibidos
+                # Procesamos mensajes completos separados por \n
+                while "\n" in buffer:
+                    mensaje, buffer = buffer.split("\n", 1)
+                    if not mensaje.strip(): continue
                     
-                    # REENVIAR (Broadcast) a todos los demas
-                    self.broadcast_estado(id_jugador, data)
+                    try:
+                        data = json.loads(mensaje)
+                        
+                        if "posicion" in data:
+                            self.jugadores_info[id_jugador] = data["posicion"]
+                            self.broadcast_estado(id_jugador, data)
+                            
+                    except json.JSONDecodeError:
+                        print(f"[ERROR JSON] Cliente {id_jugador}: {mensaje}")
 
-        except Exception as e: #Control de errores
-            print(f"[ERROR] Con el cliente {id_jugador}: {e}")
-        except json.JSONDecodeError:
-            print(f"[ERROR] JSON inválido recibido del cliente {id_jugador}.")
-        except ConnectionResetError:
-            print(f"[DESCONECTADO] Cliente {id_jugador} se desconectó abruptamente.")
+        except Exception as e:
+            print(f"[ERROR] Cliente {id_jugador}: {e}")
+        except socket.error as e:
+            print(f"[ERROR DE SOCKET] Cliente {id_jugador}: {e}")
+        except json.JSONDecodeError as e:    
+            print(f"[ERROR JSON] Cliente {id_jugador}: {e}")
         
         finally:
-            # Desconexión limpia
-            print(f"[DESCONECTADO] Cliente {id_jugador} se fue.")
-            self.clientes.remove(conexion)
-            del self.jugadores_info[id_jugador]
+            print(f"[SALIDA] Cliente {id_jugador} desconectado")
+            if conexion in self.clientes:
+                self.clientes.remove(conexion)
+            if id_jugador in self.jugadores_info:
+                del self.jugadores_info[id_jugador]
             conexion.close()
 
     def broadcast_estado(self, id_origen, data):
-        #Envía información a todos los clientes
-        mensaje_json = json.dumps(data) # Convertir a JSON
+        mensaje = json.dumps(data) + "\n"
         
         for cliente in self.clientes:
             try:
-                cliente.sendall(mensaje_json.encode("utf-8"))
+                cliente.sendall(mensaje.encode("utf-8"))
             except:
-                self.clientes.remove(cliente)
+                pass # Si falla, se encargará el hilo de ese cliente de borrarlo
 
     def iniciar(self):
-        #Bucle principal que acepta conexiones
-        print("[ESPERANDO CONEXIONES]...")
+        print("[ESPERANDO JUGADORES]...")
         while True:
-            if len(self.clientes) < 4: # Limite de 4 jugadores
+            if len(self.clientes) < 4:
                 conexion, direccion = self.server.accept()
                 self.clientes.append(conexion)
                 
-                # Enviar mensaje de BIENVENIDA con su ID
-                paquete_bienvenida = {"tipo": "BIENVENIDA", "id": self.id_actual}
-                conexion.send(json.dumps(paquete_bienvenida).encode("utf-8"))
-                
-                # Arrancar un HILO (THREAD) para este cliente
+                # ENVIAMOS BIENVENIDA CON \n
+                bienvenida = json.dumps({"tipo": "BIENVENIDA", "id": self.id_actual}) + "\n"
+                conexion.send(bienvenida.encode("utf-8"))
                 thread = threading.Thread(target=self.manejar_cliente, args=(conexion, direccion, self.id_actual))
                 thread.start()
                 
                 self.id_actual += 1
-                print(f"[CLIENTES ACTIVOS] {threading.active_count() - 1}")
             else:
                 pass
 
