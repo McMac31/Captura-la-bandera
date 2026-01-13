@@ -1,9 +1,9 @@
 import pygame
 import sys
 from config import *
-from jugador import Jugador
-from bandera import Bandera
-from cliente_red import ClienteRed
+from entidades.jugador import Jugador
+from entidades.bandera import Bandera
+from red.cliente_red import ClienteRed
 
 # Clase principal del juego
 class Juego:
