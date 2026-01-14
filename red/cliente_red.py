@@ -11,6 +11,7 @@ class ClienteRed:
         self.cola_mensajes = [] # Buzón de mensajes recibidos
         self.conectado = False
         self.buffer=""
+        self.mapa_obstaculos = []  # Mapa de obstáculos recibido del servidor
 
     def conectar(self):
         #Intenta conectar al servidor y arranca el hilo de escucha.
@@ -31,6 +32,9 @@ class ClienteRed:
                 self.id = data["id"]
                 self.conectado = True
                 print(f"[RED] Conectado al servidor con ID: {self.id}")
+
+                if "mapa" in data:
+                    self.mapa_recibido = data["mapa"]
                 
                 thread = threading.Thread(target=self.escuchar_servidor)
                 thread.daemon = True 

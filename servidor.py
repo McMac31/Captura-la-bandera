@@ -17,11 +17,14 @@ class Servidor:
         self.direcciones = {} # Mapa de direcciones {socket: direccion}
         self.jugadores_info = {} # Datos del juego {id_jugador: {x, y, color...}}
         
-        # ID para asignar a los jugadores según van llegando (1, 2, 3, 4)
-        self.id_actual = 1 
+
+        # Maximo 4 jugadores (IDs del 1 al 4)
+        self.ids_disponibles = [1, 2, 3, 4] 
         
-        # --- NUEVO: Control de la Bandera ---
+        # Control de la Bandera
         self.dueno_bandera = None # ID del jugador que tiene la bandera actualmente
+
+        self.mapa_obstaculos = [(m.x, m.y, m.w, m.h) for m in OBSTACULOS]
     
     #Funcion para manejar a un cliente
     def manejar_cliente(self, conexion, direccion, id_jugador):
@@ -79,6 +82,14 @@ class Servidor:
             if id_jugador in self.jugadores_info:
                 del self.jugadores_info[id_jugador]
             
+            # 1. Recuperamos la ID para que otro la pueda usar
+            if id_jugador not in self.ids_disponibles:
+                self.ids_disponibles.append(id_jugador)
+                self.ids_disponibles.sort() # Ordenamos para que siempre se asigne la mas baja
+            
+            # 2. Avisamos a todos de que este jugador se fue (para borrar su muñeco)
+            self.broadcast_estado(id_jugador, {"evento": "SALIDA", "id": id_jugador})
+
             # Si se va el que tiene la bandera, la liberamos Y AVISAMOS
             if self.dueno_bandera == id_jugador:
                 self.dueno_bandera = None
@@ -98,12 +109,19 @@ class Servidor:
     def iniciar(self):
         print("[ESPERANDO JUGADORES]...")
         while True:
-            if len(self.clientes) < 4:
-                conexion, direccion = self.server.accept()
+            # Aceptamos conexion
+            conexion, direccion = self.server.accept()
+            
+            # Solo dejamos entrar si hay IDs disponibles 
+            if len(self.ids_disponibles) > 0:
+                # Asignamos la ID más baja disponible
+                id_asignada = self.ids_disponibles.pop(0)
                 self.clientes.append(conexion)
                 
                 # Mensaje de bienvenida
-                bienvenida = json.dumps({"tipo": "BIENVENIDA", "id": self.id_actual}) + "\n"
+                bienvenida = json.dumps({"tipo": "BIENVENIDA",
+                                          "id": id_asignada,
+                                          "mapa": self.mapa_obstaculos}) + "\n"
                 conexion.send(bienvenida.encode("utf-8")) 
                 
                 # Sincronizamos al nuevo jugador si alguien ya tiene la bandera
@@ -111,12 +129,11 @@ class Servidor:
                      msg_estado = {"evento": "COGER", "id": self.dueno_bandera}
                      conexion.send((json.dumps(msg_estado) + "\n").encode("utf-8"))
 
-                thread = threading.Thread(target=self.manejar_cliente, args=(conexion, direccion, self.id_actual)) #Hilo para manejar al cliente
+                thread = threading.Thread(target=self.manejar_cliente, args=(conexion, direccion, id_asignada)) #Hilo para manejar al cliente
                 thread.start() #Iniciamos el hilo
-                
-                self.id_actual += 1 # Incrementamos ID para el siguiente jugador
             else:
-                pass
+                print(f"Rechazada conexión de {direccion}: Sala llena")
+                conexion.close()
 
 if __name__ == "__main__":
     s = Servidor()

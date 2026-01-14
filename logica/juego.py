@@ -27,6 +27,10 @@ class Juego:
         if self.red.conectar():
             print("Conectado al servidor de juego.")
             self.mi_id=self.red.id
+            if self.red.mapa_recibido:
+                self.obstaculos = []
+                for (x, y, w, h) in self.red.mapa_recibido:
+                    self.obstaculos.append(pygame.Rect(x, y, w, h))
         else:
             print("No se pudo conectar al servidor de juego.")
             self.mi_id = 1 # ID por defecto si falla
@@ -136,23 +140,50 @@ class Juego:
                     hubo_reset = True
                     continue 
 
+                # --- NUEVO: JUGADOR DESCONECTADO (Limpiar Slot) ---
+                elif evento == "SALIDA":
+                    if "id" in mensaje:
+                        id_salida = mensaje["id"]
+                        # Si alguien se fue, borramos su muñeco y liberamos memoria en cliente
+                        if id_salida in self.jugadores and id_salida != self.mi_id:
+                            print(f"Jugador {id_salida} desconectado. Eliminando sprite.")
+                            del self.jugadores[id_salida]
+                    continue
+
             # Actualizacion de posiciones y puntos de jugadores
             if not hubo_reset and "id" in mensaje: 
                 id_remoto = mensaje['id']
                 #Solo aceptamos datos de OTROS
-                if id_remoto != self.mi_id and id_remoto in self.jugadores: 
-                    jugador_remoto = self.jugadores[id_remoto]
+                if id_remoto != self.mi_id: 
                     
-                    if "posicion" in mensaje:  # Actualizacion de posicion
-                        pos = mensaje['posicion']
-                        jugador_remoto.establecer_posicion(pos['x'], pos['y']) 
-                    
-                    # Actualizacion de puntos 
-                    if "puntos" in mensaje:
-                            jugador_remoto.puntos = mensaje['puntos']
-                    # Actualizacion de nombre 
-                    if "nombre" in mensaje:
-                            jugador_remoto.NombreJugador = mensaje['nombre']
+                    # --- NUEVO: SI EL JUGADOR NO EXISTE (ej: reingreso), LO RE-CREAMOS ---
+                    if id_remoto not in self.jugadores:
+                         # Mapa rapido de datos originales para reconstruir al jugador
+                         datos_base = {
+                            1: (40, 40, ROJO),
+                            2: (ANCHO-80, 40, AZUL),
+                            3: (40, ALTO-80, AMARILLO),
+                            4: (ANCHO-80, ALTO-80, VERDE)
+                         }
+                         if id_remoto in datos_base:
+                             x_ini, y_ini, color_ini = datos_base[id_remoto]
+                             nuevo_j = Jugador(x_ini, y_ini, color_ini, id_remoto, f"Jugador {id_remoto}", "", False)
+                             self.jugadores[id_remoto] = nuevo_j
+
+                    # Si ya existe (o lo acabamos de crear), actualizamos
+                    if id_remoto in self.jugadores:
+                        jugador_remoto = self.jugadores[id_remoto]
+                        
+                        if "posicion" in mensaje:  # Actualizacion de posicion
+                            pos = mensaje['posicion']
+                            jugador_remoto.establecer_posicion(pos['x'], pos['y']) 
+                        
+                        # Actualizacion de puntos 
+                        if "puntos" in mensaje:
+                                jugador_remoto.puntos = mensaje['puntos']
+                        # Actualizacion de nombre 
+                        if "nombre" in mensaje:
+                                jugador_remoto.NombreJugador = mensaje['nombre']
 
         # Lista jugadores 
         lista_jugadores = list(self.jugadores.values())
@@ -162,13 +193,12 @@ class Juego:
         # Verificacion de robos
         for j1 in lista_jugadores:
             if j1.es_local:
-                # CASO A: SOY EL CAZADOR (No tengo bandera e intercepto)
+                # Solo intento robar si NO tengo la bandera
                 if self.bandera.portador != j1:
                     for j2 in lista_jugadores:
                         if j1 != j2:
                             # Si robo a alguien, aviso de un RESET
                             if j1.robar(j2, self.bandera):
-                                print("¡Robo realizado! Enviando RESET...")
                                 self.red.enviar({'id': self.mi_id, 'evento': 'RESET'})
                                 self.resetear_ronda() # Me reseteo yo tambien visualmente al instante
 
