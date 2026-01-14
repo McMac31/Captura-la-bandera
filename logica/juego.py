@@ -218,7 +218,7 @@ class Juego:
         self.bandera.reiniciar()
         # Reiniciamos a TODOS los jugadores
         for jugador in self.jugadores.values():
-            if hasattr(jugador, 'reiniciar_posicion'):
+            if hasattr(jugador, 'reiniciar_posicion'): # Si el metodo existe
                 jugador.reiniciar_posicion()
             else:
                  # Backup por si no existe el metodo en jugador
@@ -249,9 +249,11 @@ class Juego:
             # Buscamos la base que le toca a este jugador
             rect_base = mapa_bases.get(jugador.id) # Obtener el rectángulo de la base
             if rect_base:
-                texto_puntos = self.fuente.render(str(jugador.puntos), True, NEGRO) #
+                texto_nombre = self.fuente.render(str(jugador.NombreJugador), True, NEGRO)
+                texto_puntos = self.fuente.render(str(jugador.puntos), True, NEGRO) 
                 #Centrado de texto
                 rect_texto = texto_puntos.get_rect(center=rect_base.center)
+                rect_nombre = texto_nombre.get_rect(center=(rect_base.centerx, rect_base.centery - 10))
                 #Poner texto en pantalla
                 self.pantalla.blit(texto_puntos, rect_texto)
 
