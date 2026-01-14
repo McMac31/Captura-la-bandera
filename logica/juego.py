@@ -14,14 +14,17 @@ class Juego:
         pygame.display.set_caption(TITULO)
         self.reloj = pygame.time.Clock()
         self.ejecutando = True
+        
+        # --- Variables para control de LAG ---
+        self.ultimo_envio = 0
+        self.intervalo_envio = 50 
+
         self.nombrelocal=nombre_jugador
         self.emaillocal=email_jugador
         self.red=ClienteRed()
         self.fuente = pygame.font.SysFont("Impact", 40)
         if self.red.conectar():
             print("Conectado al servidor de juego.")
-            
-        
             self.mi_id=self.red.id
         else:
             print("No se pudo conectar al servidor de juego.")
@@ -74,50 +77,81 @@ class Juego:
 
    # Actualizamos el estado del juego
     def actualizar(self):
+        tiempo_actual = pygame.time.get_ticks()
+
         #Control de red: procesar mensajes entrantes
         if self.mi_id in self.jugadores:
             jugador_local= self.jugadores[self.mi_id]
 
             #Guardado de posicion anterior
             pos_anterior=(jugador_local.rect.x, jugador_local.rect.y)
+            puntos_anteriores = jugador_local.puntos
+            
             jugador_local.mover(self.obstaculos) #Movimiento local
 
-            if (jugador_local.rect.x, jugador_local.rect.y) != pos_anterior: #Si hubo cambio de posicion
-                datos={
-                    'id': self.mi_id,
-                    'posicion':{"x": jugador_local.rect.x, "y": jugador_local.rect.y},
-                    'puntos': jugador_local.puntos,
-                    'nombre': jugador_local.NombreJugador,
-                    'email': jugador_local.EmailJugador}
-                self.red.enviar(datos) #Envio de nueva posicion al servidor
+            # Control de LAG: Solo enviamos cada X ms
+            if tiempo_actual - self.ultimo_envio > self.intervalo_envio:
+                if (jugador_local.rect.x, jugador_local.rect.y) != pos_anterior or jugador_local.puntos != puntos_anteriores: #Si hubo cambio de posicion o puntos
+                    datos={
+                        'id': self.mi_id,
+                        'posicion':{"x": jugador_local.rect.x, "y": jugador_local.rect.y},
+                        'puntos': jugador_local.puntos,
+                        'nombre': jugador_local.NombreJugador,
+                        'email': jugador_local.EmailJugador}
+                    self.red.enviar(datos) #Envio de nueva posicion al servidor
+                    self.ultimo_envio = tiempo_actual
                 
-            #Recepcion de datos del servidor
-            mensajes=self.red.obtener_mensajes()
-            for mensaje in mensajes:
-                if "posicion" in mensaje and "id"in mensaje: #Mensaje de posicion de otro jugador
-                    id_remoto=mensaje['id']
-                    if id_remoto != self.mi_id and id_remoto in self.jugadores: #Si no soy yo y conozco al jugador
-                        pos= mensaje['posicion']
-                        self.jugadores[id_remoto].establecer_posicion(pos['x'], pos['y']) #Actualizacion de posicion remota
-                # Actualizacion de puntos si viene en el mensaje
-                if "puntos" in mensaje:
-                        self.jugadores[id_remoto].puntos = mensaje['puntos']
-                    # Actualizacion de nombre si viene en el mensaje
-                if "nombre" in mensaje:
-                        self.jugadores[id_remoto].nombre = mensaje['nombre']
+        #Recepcion de datos del servidor
+        mensajes = self.red.obtener_mensajes()
         
+        # --- FASE 1: BUSQUEDA PRIORITARIA DE RESET ---
+        # Buscamos si hay un evento RESET antes de procesar movimientos viejos
+        hubo_reset = False
+        for mensaje in mensajes:
+            # Enviamos que se tiene que resetear la ronda
+            if "evento" in mensaje and mensaje["evento"] == "RESET":
+                #  Actualizamos los puntos del jugador que anotó 
+                if "id" in mensaje and "puntos" in mensaje:
+                    id_anotador = mensaje["id"]
+                    if id_anotador in self.jugadores:
+                        self.jugadores[id_anotador].puntos = mensaje["puntos"]
+                # Reiniciamos la ronda
+                self.resetear_ronda()
+                hubo_reset = True
+                break # IMPORTANTE: Salimos para ignorar mensajes de posición viejos en este frame
+
+        # --- FASE 2: PROCESAR RESTO DE MENSAJES ---
+        # Solo procesamos posiciones si NO hubo un reset (evita el bug de la bandera fantasma)
+        if not hubo_reset:
+            for mensaje in mensajes:
+                if "id" in mensaje: 
+                    id_remoto = mensaje['id']
+                    # Filtro de Autoridad: Solo aceptamos datos de OTROS (para no machacar los nuestros)
+                    if id_remoto != self.mi_id and id_remoto in self.jugadores: #Si no soy yo y conozco al jugador
+                        jugador_remoto = self.jugadores[id_remoto]
+                        
+                        if "posicion" in mensaje: #Mensaje de posicion de otro jugador
+                            pos= mensaje['posicion']
+                            jugador_remoto.establecer_posicion(pos['x'], pos['y']) #Actualizacion de posicion remota
+                        
+                        # Actualizacion de puntos si viene en el mensaje
+                        if "puntos" in mensaje:
+                                jugador_remoto.puntos = mensaje['puntos']
+                            # Actualizacion de nombre si viene en el mensaje
+                        if "nombre" in mensaje:
+                                jugador_remoto.NombreJugador = mensaje['nombre']
+
         # Lista jugadores 
         lista_jugadores = list(self.jugadores.values())
-
-        # Actualizar Bandera
-        # (Ahora usamos el nuevo método que acepta la lista de jugadores)
+        # Actualizar Bandera de acuerdo a jugadores
         self.bandera.actualizar(lista_jugadores)
 
         # Verificacion de robos
         for j1 in lista_jugadores:
-            for j2 in lista_jugadores:
-                if j1 != j2:
-                    j1.robar(j2, self.bandera)
+            if j1.es_local: # Solo el que roba verifica (Autoridad)
+                for j2 in lista_jugadores:
+                    if j1 != j2:
+                        j1.robar(j2, self.bandera)
 
         # Verificacion de puntos
         self.verificar_puntos()
@@ -126,7 +160,8 @@ class Juego:
     def verificar_puntos(self):
         portador = self.bandera.portador
         
-        if portador:
+        # Solo verificamos si nosotros llevamos la bandera (Autoridad)
+        if portador and portador.es_local:
             anoto_punto = False
             
             # Verificamos colisión con la base correspondiente según el ID
@@ -143,13 +178,25 @@ class Juego:
                 portador.puntos += 1
                 print(f"¡Jugador {portador.id} ({portador.color}) anotó un punto!")
                 self.resetear_ronda()
+                datos_puntuar = {
+                    'id': self.mi_id,
+                    'evento': 'RESET',         # Indicamos que es un reset de ronda
+                    'puntos': portador.puntos   # Enviamos el dato actualizado
+                }
+                self.red.enviar(datos_puntuar)
+            
 
     # Funcion para resetear la ronda
     def resetear_ronda(self):
         self.bandera.reiniciar()
         # Reiniciamos a TODOS los jugadores
         for jugador in self.jugadores.values():
-            jugador.reiniciar_posicion()
+            if hasattr(jugador, 'reiniciar_posicion'):
+                jugador.reiniciar_posicion()
+            else:
+                 # Backup por si no existe el metodo en jugador
+                jugador.rect.x = jugador.inicio_x
+                jugador.rect.y = jugador.inicio_y
 
     # Dibujamos todos los elementos en la pantalla
     def dibujar(self):
@@ -198,5 +245,7 @@ class Juego:
             self.dibujar()
             self.reloj.tick(FPS)
         # Salimos del juego
+        if self.red.cliente:
+            self.red.cliente.close()
         pygame.quit()
         sys.exit()
