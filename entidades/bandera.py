@@ -15,19 +15,18 @@ class Bandera:
         self.portador = None
         self.rect.center = (ANCHO // 2, ALTO // 2)
 
-    #Funcion para actualizar la posicion de la bandera
-    def actualizar(self, jugador_rojo, jugador_azul):
+    def actualizar(self, lista_jugadores): #Recibe la lista de jugadores
         # Si nadie la tiene, comprobar si alguien la toca
         if self.portador is None:
             self.capturada = False
-            if self.rect.colliderect(jugador_rojo.rect): #Si el jugador rojo la toca
-                self.portador = jugador_rojo
-                self.capturada = True
-            elif self.rect.colliderect(jugador_azul.rect):#Si el jugador azul la toca
-                self.portador = jugador_azul
-                self.capturada = True
+            for jugador in lista_jugadores:
+                # Verificamos colisión con el rectángulo del jugador
+                if self.rect.colliderect(jugador.rect):
+                    self.portador = jugador
+                    self.capturada = True
+                    break # Solo un jugador puede cogerla a la vez
         
-        # Si alguien la tiene, seguirlo
+        # 2. Si alguien la tiene, la bandera sigue al jugador
         else:
             self.rect.center = self.portador.rect.center
 

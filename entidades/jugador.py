@@ -4,13 +4,15 @@ from config import *
 #Clase Jugador
 class Jugador:
     # Inicializamos clase jugador y atributos
-    def __init__(self, x, y, color, id_jugador, es_local=False):
+    def __init__(self, x, y, color, id_jugador, NombreJugador, EmailJugador, es_local=False):
         self.rect = pygame.Rect(x, y, 40, 40)
         self.color = color
         self.velocidad = 5
         self.puntos = 0 # Puntos del jugador
         self.inicio_x = x
         self.inicio_y = y
+        self.NombreJugador=NombreJugador
+        self.EmailJugador=EmailJugador
         # Atributos para red
         self.id = id_jugador # Identificador único del jugador
         self.es_local = es_local  # True si soy yo, False si es otro cliente

@@ -1,12 +1,12 @@
 import pygame
 
-# --- Configuración de Pantalla ---
+# Configuración de Pantalla
 ANCHO = 800
 ALTO = 600
 TITULO = "Captura la Bandera - 4 Jugadores"
 FPS = 60
 
-# --- Colores ---
+#  Colores
 BLANCO = (255, 255, 255)
 NEGRO = (0, 0, 0)
 GRIS = (200, 200, 200)

@@ -11,7 +11,7 @@ class Servidor:
         self.server.bind(DIRECCION_SERVIDOR) #Enlazamos el socket a la direccion y puerto
         self.server.listen() #Ponemos el servidor en modo escucha
         
-        print(f"[ARRANCANDO] Servidor escuchando en {SERVIDOR_IP}:{PUERTO}")
+        print(f"[ARRANCANDO] Servidor escuchando en {SERVIDOR_IP}:{PUERTO}") #Validamos que el servidor esta corriendo
 
         self.clientes = [] # Lista de sockets conectados
         self.direcciones = {} # Mapa de direcciones {socket: direccion}
@@ -23,19 +23,19 @@ class Servidor:
     #Funcion para manejar a un cliente
     def manejar_cliente(self, conexion, direccion, id_jugador):
         print(f"[CONEXIÓN] {direccion} ID: {id_jugador}")
-        buffer = ""
-        try:
+        buffer = "" 
+        try: #Control de excepciones
             while True:
-                datos_recibidos = conexion.recv(2048).decode("utf-8")
+                datos_recibidos = conexion.recv(2048).decode("utf-8") #Recibimos datos del cliente
                 if not datos_recibidos: break
                 buffer += datos_recibidos
                 # Procesamos mensajes completos separados por \n
                 while "\n" in buffer:
-                    mensaje, buffer = buffer.split("\n", 1)
+                    mensaje, buffer = buffer.split("\n", 1) 
                     if not mensaje.strip(): continue
                     
                     try:
-                        data = json.loads(mensaje)
+                        data = json.loads(mensaje) #Decodificamos el JSON recibido
                         
                         if "posicion" in data:
                             self.jugadores_info[id_jugador] = data["posicion"]
@@ -43,14 +43,14 @@ class Servidor:
                             
                     except json.JSONDecodeError:
                         print(f"[ERROR JSON] Cliente {id_jugador}: {mensaje}")
-
+        #Control de excepciones
         except Exception as e:
             print(f"[ERROR] Cliente {id_jugador}: {e}")
         except socket.error as e:
             print(f"[ERROR DE SOCKET] Cliente {id_jugador}: {e}")
         except json.JSONDecodeError as e:    
             print(f"[ERROR JSON] Cliente {id_jugador}: {e}")
-        
+        # Cerramos la conexion del cliente
         finally:
             print(f"[SALIDA] Cliente {id_jugador} desconectado")
             if conexion in self.clientes:
@@ -75,13 +75,13 @@ class Servidor:
                 conexion, direccion = self.server.accept()
                 self.clientes.append(conexion)
                 
-                # ENVIAMOS BIENVENIDA CON \n
+                # Mensaje de bienvenida
                 bienvenida = json.dumps({"tipo": "BIENVENIDA", "id": self.id_actual}) + "\n"
-                conexion.send(bienvenida.encode("utf-8"))
-                thread = threading.Thread(target=self.manejar_cliente, args=(conexion, direccion, self.id_actual))
-                thread.start()
+                conexion.send(bienvenida.encode("utf-8")) 
+                thread = threading.Thread(target=self.manejar_cliente, args=(conexion, direccion, self.id_actual)) #Hilo para manejar al cliente
+                thread.start() #Iniciamos el hilo
                 
-                self.id_actual += 1
+                self.id_actual += 1 # Incrementamos ID para el siguiente jugador
             else:
                 pass
 
