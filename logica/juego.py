@@ -24,19 +24,27 @@ class Juego:
         self.red=ClienteRed()
         self.fuenteptos = pygame.font.SysFont("Impact", 40)
         self.fuentenombre = pygame.font.SysFont("Verdana", 15)
+        
+        # Cargar obstaculos desde config (por defecto los locales)
+        self.obstaculos = OBSTACULOS
+
         if self.red.conectar():
             print("Conectado al servidor de juego.")
             self.mi_id=self.red.id
-            if self.red.mapa_recibido:
+            
+            # Si recibimos un mapa del servidor, usamos ese y machacamos el local
+            if self.red.mapa_recibido is not None and len(self.red.mapa_recibido) > 0:
                 self.obstaculos = []
                 for (x, y, w, h) in self.red.mapa_recibido:
                     self.obstaculos.append(pygame.Rect(x, y, w, h))
+                print("Mapa sincronizado con el servidor.")
+            else:
+                 print("Usando mapa local (No se recibió mapa del servidor).")
+
         else:
             print("No se pudo conectar al servidor de juego.")
             self.mi_id = 1 # ID por defecto si falla
 
-        # Cargar obstaculos desde config
-        self.obstaculos = OBSTACULOS
         # Diccionario de jugadores
         self.jugadores = {}
         

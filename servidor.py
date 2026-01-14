@@ -17,13 +17,13 @@ class Servidor:
         self.direcciones = {} # Mapa de direcciones {socket: direccion}
         self.jugadores_info = {} # Datos del juego {id_jugador: {x, y, color...}}
         
-
         # Maximo 4 jugadores (IDs del 1 al 4)
         self.ids_disponibles = [1, 2, 3, 4] 
         
         # Control de la Bandera
         self.dueno_bandera = None # ID del jugador que tiene la bandera actualmente
 
+        # Generamos el mapa una sola vez para enviarlo a todos
         self.mapa_obstaculos = [(m.x, m.y, m.w, m.h) for m in OBSTACULOS]
     
     #Funcion para manejar a un cliente
@@ -82,12 +82,12 @@ class Servidor:
             if id_jugador in self.jugadores_info:
                 del self.jugadores_info[id_jugador]
             
-            # 1. Recuperamos la ID para que otro la pueda usar
+            # Recuperamos la ID para que otro la pueda usar
             if id_jugador not in self.ids_disponibles:
                 self.ids_disponibles.append(id_jugador)
                 self.ids_disponibles.sort() # Ordenamos para que siempre se asigne la mas baja
             
-            # 2. Avisamos a todos de que este jugador se fue (para borrar su muñeco)
+            # Avisamos a todos de que este jugador se fue (para borrar su muñeco)
             self.broadcast_estado(id_jugador, {"evento": "SALIDA", "id": id_jugador})
 
             # Si se va el que tiene la bandera, la liberamos Y AVISAMOS
@@ -118,10 +118,12 @@ class Servidor:
                 id_asignada = self.ids_disponibles.pop(0)
                 self.clientes.append(conexion)
                 
-                # Mensaje de bienvenida
-                bienvenida = json.dumps({"tipo": "BIENVENIDA",
-                                          "id": id_asignada,
-                                          "mapa": self.mapa_obstaculos}) + "\n"
+                # Mensaje de bienvenida CON EL MAPA
+                bienvenida = json.dumps({
+                    "tipo": "BIENVENIDA",
+                    "id": id_asignada,
+                    "mapa": self.mapa_obstaculos
+                }) + "\n"
                 conexion.send(bienvenida.encode("utf-8")) 
                 
                 # Sincronizamos al nuevo jugador si alguien ya tiene la bandera

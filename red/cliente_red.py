@@ -11,7 +11,7 @@ class ClienteRed:
         self.cola_mensajes = [] # Buzón de mensajes recibidos
         self.conectado = False
         self.buffer=""
-        self.mapa_obstaculos = []  # Mapa de obstáculos recibido del servidor
+        self.mapa_recibido = None  # Mapa de obstáculos recibido del servidor
 
     def conectar(self):
         #Intenta conectar al servidor y arranca el hilo de escucha.
@@ -19,7 +19,8 @@ class ClienteRed:
             self.cliente.connect(DIRECCION_SERVIDOR)
             buffer_temp = ""
             while "\n" not in buffer_temp:
-                datos_recibidos = self.cliente.recv(2048).decode("utf-8")
+                # Aumentamos un poco el buffer por si el mapa es grande
+                datos_recibidos = self.cliente.recv(4096).decode("utf-8")
                 if not datos_recibidos: raise Exception("Servidor cerró")
                 buffer_temp += datos_recibidos
             
@@ -33,17 +34,16 @@ class ClienteRed:
                 self.conectado = True
                 print(f"[RED] Conectado al servidor con ID: {self.id}")
 
+                # Guardamos el mapa si viene en el mensaje
                 if "mapa" in data:
                     self.mapa_recibido = data["mapa"]
+                    print(f"[RED] Mapa recibido con {len(self.mapa_recibido)} muros")
                 
                 thread = threading.Thread(target=self.escuchar_servidor)
                 thread.daemon = True 
                 thread.start()
                 return True
             #Control de excepciones
-        except Exception as e:
-            print(f"[RED] Error al conectar: {e}")
-            return False
         except Exception as e:
             print(f"[RED] Error al conectar: {e}")
             return False
@@ -65,17 +65,16 @@ class ClienteRed:
         #Hilo que escucha mensajes del servidor.
         while self.conectado:
             try:
-                # 1. Recibimos datos crudos
+                # Recibimos datos del servidor
                 datos_recibidos = self.cliente.recv(2048).decode("utf-8")
                 if not datos_recibidos:
                     print("[RED] Servidor cerró conexión")
                     self.conectado = False
                     break
-                
-                # 2. Añadimos al buffer
+                # Añadimos al buffer
                 self.buffer += datos_recibidos
                 
-                # 3. Procesamos todos los mensajes completos que haya en el buffer
+                # Procesamos todos los mensajes completos que haya en el buffer
                 while "\n" in self.buffer:
                     mensaje_completo, self.buffer = self.buffer.split("\n", 1)
                     if mensaje_completo.strip(): # Ignoramos líneas vacías
