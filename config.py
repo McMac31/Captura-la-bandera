@@ -1,12 +1,14 @@
 import pygame
+import random
 
-# --- Configuración de Pantalla ---
+
+# Configuración de Pantalla
 ANCHO = 800
 ALTO = 600
-TITULO = "Captura la Bandera - 4 Jugadores"
+TITULO = "Captura la Bandera"
 FPS = 60
 
-# --- Colores ---
+#  Colores
 BLANCO = (255, 255, 255)
 NEGRO = (0, 0, 0)
 GRIS = (200, 200, 200)
@@ -32,19 +34,47 @@ BASE_AMARILLA= pygame.Rect(0, ALTO - TAMANO_BASE, TAMANO_BASE, TAMANO_BASE) # Es
 BASE_VERDE = pygame.Rect(ANCHO - TAMANO_BASE, ALTO - TAMANO_BASE, TAMANO_BASE, TAMANO_BASE) # Esquina Inferior Derecha
 
 # Obstáculos 
-OBSTACULOS = [
-    pygame.Rect(200, 100, 20, 400),   # Muro vertical izquierdo
-    pygame.Rect(580, 100, 20, 400),   # Muro vertical derecho
-    pygame.Rect(300, 290, 200, 20),   # Muro central horizontal
-    pygame.Rect(100, 400, 80, 20),    # Obstáculo extra izquierda
-    pygame.Rect(620, 200, 80, 20)     # Obstáculo extra derecha
-]
+def generar_obstaculos():
+    lista = []
+    # Zona de la bandera para evitar colocar muros encima
+    zona_bandera = pygame.Rect(ANCHO//2 - 50, ALTO//2 - 50, 100, 100)
+    
+    # Creamos 10 obstáculos aleatorios
+    for _ in range(10): 
+        intentos = 0
+        while intentos < 50: # Evitar bucle infinito
+            w = random.randint(40, 150) # Ancho aleatorio
+            h = random.randint(40, 150) # Alto aleatorio
+            x = random.randint(0, ANCHO - w)
+            y = random.randint(0, ALTO - h)
+            muro = pygame.Rect(x, y, w, h)
+            
+            # NO chocar con la bandera
+            if muro.colliderect(zona_bandera):
+                intentos += 1
+                continue
+                
+            # NO chocar con ninguna base
+            if (muro.colliderect(BASE_ROJA) or 
+                muro.colliderect(BASE_AZUL) or 
+                muro.colliderect(BASE_AMARILLA) or 
+                muro.colliderect(BASE_VERDE)):
+                intentos += 1
+                continue
+                
+            # Si pasa las pruebas, lo añadimos
+            lista.append(muro)
+            break
+    return lista
+
+# Generamos la lista al iniciar
+OBSTACULOS = generar_obstaculos()
 
 # Controles Jugador local
 TECLAS_LOCAL = {'arriba': pygame.K_w, 'abajo': pygame.K_s, 'izq': pygame.K_a, 'der': pygame.K_d}
 
 #Configuracion de red
 
-SERVIDOR_IP = "192.168.24.219" #IP de mi pc en la red local
+SERVIDOR_IP = "192.168.24.219" 
 PUERTO=8000
 DIRECCION_SERVIDOR = (SERVIDOR_IP, PUERTO)

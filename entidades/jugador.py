@@ -4,25 +4,27 @@ from config import *
 #Clase Jugador
 class Jugador:
     # Inicializamos clase jugador y atributos
-    def __init__(self, x, y, color, id_jugador, es_local=False):
+    def __init__(self, x, y, color, id_jugador, NombreJugador, EmailJugador, es_local=False):
         self.rect = pygame.Rect(x, y, 40, 40)
         self.color = color
         self.velocidad = 5
         self.puntos = 0 # Puntos del jugador
         self.inicio_x = x
         self.inicio_y = y
+        self.NombreJugador=NombreJugador
+        self.EmailJugador=EmailJugador
         # Atributos para red
         self.id = id_jugador # Identificador único del jugador
         self.es_local = es_local  # True si soy yo, False si es otro cliente
         self.controles = None     # Se asignarán solo si es local
 
     def mover(self, lista_obstaculos):
-        # SOLO nos movemos por teclado si somos el jugador local
+        # solo movemos con teclas el jugador local
         if not self.es_local or not self.controles:
             return
         #Inicializamos variables de movimiento
         teclas = pygame.key.get_pressed()
-        dx, dy = 0, 0 #Dirección del movimiento
+        dx, dy = 0, 0 #Dirección del movimiento direccion x, direccion y
 
         #Lista de controles
         if teclas[self.controles['arriba']]: dy = -self.velocidad
@@ -56,8 +58,11 @@ class Jugador:
             if bandera.portador == enemigo:
                 print(f"¡Cazado! {self.color} atrapó a {enemigo.color}.")
                 bandera.reiniciar()
-                self.reiniciar_posicion()
-                enemigo.reiniciar_posicion()
+                # AQUI ESTA EL CAMBIO: Reiniciamos a LOS DOS
+                self.reiniciar_posicion() # El cazador vuelve a casa
+                enemigo.reiniciar_posicion() # La victima vuelve a casa
+                return True # Hubo robo
+        return False # No hubo robo
 
     #Funcion para dibujar el jugador
     def dibujar(self, pantalla):
