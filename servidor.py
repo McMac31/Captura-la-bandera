@@ -79,9 +79,13 @@ class Servidor:
                 self.clientes.remove(conexion)
             if id_jugador in self.jugadores_info:
                 del self.jugadores_info[id_jugador]
-            # Si se va el que tiene la bandera, la liberamos
+            
+            # Si se va el que tiene la bandera, la liberamos Y AVISAMOS
             if self.dueno_bandera == id_jugador:
+                print(f"Jugador {id_jugador} salió con la bandera. Reseteando.")
                 self.dueno_bandera = None
+                self.broadcast_estado(id_jugador, {"evento": "RESET"}) # Importante: Avisar reset a los demas
+
             conexion.close()
 
     def broadcast_estado(self, id_origen, data):
@@ -103,6 +107,12 @@ class Servidor:
                 # Mensaje de bienvenida
                 bienvenida = json.dumps({"tipo": "BIENVENIDA", "id": self.id_actual}) + "\n"
                 conexion.send(bienvenida.encode("utf-8")) 
+                
+                # Sincronizamos al nuevo jugador si alguien ya tiene la bandera
+                if self.dueno_bandera is not None:
+                     msg_estado = {"evento": "COGER", "id": self.dueno_bandera}
+                     conexion.send((json.dumps(msg_estado) + "\n").encode("utf-8"))
+
                 thread = threading.Thread(target=self.manejar_cliente, args=(conexion, direccion, self.id_actual)) #Hilo para manejar al cliente
                 thread.start() #Iniciamos el hilo
                 

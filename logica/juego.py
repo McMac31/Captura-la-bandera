@@ -15,9 +15,9 @@ class Juego:
         self.reloj = pygame.time.Clock()
         self.ejecutando = True
         
-        # --- Variables para control de LAG ---
+        # Control de LAG
         self.ultimo_envio = 0
-        self.intervalo_envio = 50 
+        self.intervalo_envio = 50 #50ms
 
         self.nombrelocal=nombre_jugador
         self.emaillocal=email_jugador
@@ -80,7 +80,7 @@ class Juego:
     def actualizar(self):
         tiempo_actual = pygame.time.get_ticks()
 
-        #Control de red: procesar mensajes entrantes
+        #Control de red y movimiento local
         if self.mi_id in self.jugadores:
             jugador_local= self.jugadores[self.mi_id]
 
@@ -90,16 +90,14 @@ class Juego:
             
             jugador_local.mover(self.obstaculos) #Movimiento local
 
-            # --- NUEVO: Petición de Bandera al Servidor ---
             # Si toco la bandera y nadie la tiene, la PIDO. No la cojo directamente.
             if self.bandera.portador is None and self.bandera.rect.colliderect(jugador_local.rect):
-                print("Solicitando bandera al servidor...")
                 self.red.enviar({'evento': 'PETICION', 'id': self.mi_id})
 
-            # Control de LAG: Solo enviamos cada X ms
+            # Control de LAG: Solo enviamos cada 50s
             if tiempo_actual - self.ultimo_envio > self.intervalo_envio:
                 if (jugador_local.rect.x, jugador_local.rect.y) != pos_anterior or jugador_local.puntos != puntos_anteriores: #Si hubo cambio de posicion o puntos
-                    datos={
+                    datos={ #Datos a enviar
                         'id': self.mi_id,
                         'posicion':{"x": jugador_local.rect.x, "y": jugador_local.rect.y},
                         'puntos': jugador_local.puntos,
@@ -111,21 +109,21 @@ class Juego:
         #Recepcion de datos del servidor
         mensajes = self.red.obtener_mensajes()
         
-        # --- FASE 1: GESTION DE EVENTOS (COGER / RESET) ---
+        #Eventos para saber que hacer
         hubo_reset = False
         for mensaje in mensajes:
             # Si recibimos evento
             if "evento" in mensaje:
                 evento = mensaje["evento"]
                 
-                # ALGUIEN (Yo u otro) ha recibido permiso para COGER la bandera
+                # Si el evento es COGER
                 if evento == "COGER" and "id" in mensaje:
                     id_ganador = mensaje["id"]
                     if id_ganador in self.jugadores:
-                        print(f"Evento: La bandera es del Jugador {id_ganador}")
-                        self.bandera.portador = self.jugadores[id_ganador]
+                        print(f"Evento: La bandera es del Jugador {id_ganador}") 
+                        self.bandera.portador = self.jugadores[id_ganador] #le damos la bandera al jugador correspondiente
                 
-                # Evento RESET (Gol o Robo)
+                # Evento RESET 
                 elif evento == "RESET":
                     #  Actualizamos los puntos del jugador que anotó 
                     if "id" in mensaje and "puntos" in mensaje:
@@ -137,7 +135,7 @@ class Juego:
                     hubo_reset = True
                     continue 
 
-            # --- FASE 2: GESTION DE POSICIONES (Si no hubo reset) ---
+            # Actualizacion de posiciones y puntos de jugadores
             if not hubo_reset and "id" in mensaje: 
                 id_remoto = mensaje['id']
                 #Solo aceptamos datos de OTROS
@@ -162,13 +160,25 @@ class Juego:
 
         # Verificacion de robos
         for j1 in lista_jugadores:
-            if j1.es_local: # Solo el que roba verifica (Autoridad)
-                for j2 in lista_jugadores:
-                    if j1 != j2:
-                        # Si robo a alguien, aviso de un RESET
-                        if j1.robar(j2, self.bandera):
-                            print("¡Robo realizado! Enviando RESET...")
+            if j1.es_local:
+                # CASO A: SOY EL CAZADOR (No tengo bandera e intercepto)
+                if self.bandera.portador != j1:
+                    for j2 in lista_jugadores:
+                        if j1 != j2:
+                            # Si robo a alguien, aviso de un RESET
+                            if j1.robar(j2, self.bandera):
+                                print("¡Robo realizado! Enviando RESET...")
+                                self.red.enviar({'id': self.mi_id, 'evento': 'RESET'})
+                                self.resetear_ronda() # Me reseteo yo tambien visualmente al instante
+
+                # Controlamos el suicidio con la bandera
+                else: 
+                    # Comprobamos si choco con algun enemigo
+                    for enemigo in lista_jugadores:
+                        if j1 != enemigo and j1.rect.colliderect(enemigo.rect):
                             self.red.enviar({'id': self.mi_id, 'evento': 'RESET'})
+                            self.resetear_ronda() # Me reseteo al instante
+                            break
 
         # Verificacion de puntos
         self.verificar_puntos()

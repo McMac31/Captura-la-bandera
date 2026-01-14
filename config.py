@@ -1,5 +1,6 @@
 import pygame
 
+
 # Configuración de Pantalla
 ANCHO = 800
 ALTO = 600
@@ -35,7 +36,6 @@ BASE_VERDE = pygame.Rect(ANCHO - TAMANO_BASE, ALTO - TAMANO_BASE, TAMANO_BASE, T
 OBSTACULOS = [
     pygame.Rect(200, 100, 20, 400),   # Muro vertical izquierdo
     pygame.Rect(580, 100, 20, 400),   # Muro vertical derecho
-    pygame.Rect(300, 290, 200, 20),   # Muro central horizontal
     pygame.Rect(100, 400, 80, 20),    # Obstáculo extra izquierda
     pygame.Rect(620, 200, 80, 20)     # Obstáculo extra derecha
 ]
