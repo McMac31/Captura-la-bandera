@@ -22,7 +22,8 @@ class Juego:
         self.nombrelocal=nombre_jugador
         self.emaillocal=email_jugador
         self.red=ClienteRed()
-        self.fuente = pygame.font.SysFont("Impact", 40)
+        self.fuenteptos = pygame.font.SysFont("Impact", 40)
+        self.fuentenombre = pygame.font.SysFont("Verdana", 15)
         if self.red.conectar():
             print("Conectado al servidor de juego.")
             self.mi_id=self.red.id
@@ -249,13 +250,14 @@ class Juego:
             # Buscamos la base que le toca a este jugador
             rect_base = mapa_bases.get(jugador.id) # Obtener el rectángulo de la base
             if rect_base:
-                texto_nombre = self.fuente.render(str(jugador.NombreJugador), True, NEGRO)
-                texto_puntos = self.fuente.render(str(jugador.puntos), True, NEGRO) 
+                texto_nombre = self.fuentenombre.render(str(jugador.NombreJugador), True, NEGRO)
+                texto_puntos = self.fuenteptos.render(str(jugador.puntos), True, NEGRO) 
                 #Centrado de texto
                 rect_texto = texto_puntos.get_rect(center=rect_base.center)
-                rect_nombre = texto_nombre.get_rect(center=(rect_base.centerx, rect_base.centery - 10))
+                rect_nombre = texto_nombre.get_rect(midbottom=(rect_base.centerx, rect_texto.top))
                 #Poner texto en pantalla
                 self.pantalla.blit(texto_puntos, rect_texto)
+                self.pantalla.blit(texto_nombre, rect_nombre)
 
         # Dibujar jugadores
         for jugador in self.jugadores.values():
