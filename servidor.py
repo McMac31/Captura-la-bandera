@@ -40,20 +40,19 @@ class Servidor:
                     try:
                         data = json.loads(mensaje) #Decodificamos el JSON recibido
                         
-                        # --- LÓGICA DE ÁRBITRO ---
+                        # Si es un evento especial
                         if "evento" in data:
                             # Si alguien pide la bandera
                             if data["evento"] == "PETICION":
                                 # Solo se la damos si NADIE la tiene
                                 if self.dueno_bandera is None:
                                     self.dueno_bandera = id_jugador
-                                    print(f"ARBITRO: Bandera asignada al Jugador {id_jugador}")
                                     
-                                    # Avisamos a TODOS de quién es el nuevo dueño con un evento COGER
+                                    # controlamos quien tiene la bandera
                                     msg_oficial = {"evento": "COGER", "id": id_jugador}
                                     self.broadcast_estado(id_jugador, msg_oficial)
                             
-                            # Si hay un RESET (Gol o Robo), liberamos la bandera
+                            # Si hay un reset
                             elif data["evento"] == "RESET":
                                 self.dueno_bandera = None
                                 self.broadcast_estado(id_jugador, data)
@@ -82,9 +81,8 @@ class Servidor:
             
             # Si se va el que tiene la bandera, la liberamos Y AVISAMOS
             if self.dueno_bandera == id_jugador:
-                print(f"Jugador {id_jugador} salió con la bandera. Reseteando.")
                 self.dueno_bandera = None
-                self.broadcast_estado(id_jugador, {"evento": "RESET"}) # Importante: Avisar reset a los demas
+                self.broadcast_estado(id_jugador, {"evento": "RESET"})
 
             conexion.close()
 
