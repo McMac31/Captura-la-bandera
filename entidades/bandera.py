@@ -13,24 +13,18 @@ class Bandera:
     #Funcion para que la bandera vuelva a la posicion inicial
     def reiniciar(self):
         self.portador = None
+        self.capturada = False
         self.rect.center = (ANCHO // 2, ALTO // 2)
 
-    def actualizar(self, lista_jugadores): #Recibe la lista de jugadores
-        # Si nadie la tiene, comprobar si alguien la toca
-        if self.portador is None:
-            self.capturada = False
-            for jugador in lista_jugadores:
-                # Verificamos colisión con el rectángulo del jugador
-                if self.rect.colliderect(jugador.rect):
-                    self.portador = jugador
-                    self.capturada = True
-                    break # Solo un jugador puede cogerla a la vez
-        
-        # 2. Si alguien la tiene, la bandera sigue al jugador
-        else:
+    def actualizar(self, lista_jugadores=None): # Mantenemos el argumento por compatibilidad, aunque no se use
+        # La bandera SOLO se mueve si tiene portador asignado por el servidor
+        if self.portador:
             self.rect.center = self.portador.rect.center
+            self.capturada = True
 
     #Funcion para dibujar la bandera
     def dibujar(self, pantalla):
-        pygame.draw.rect(pantalla, VERDE, self.rect) #La bandera es verde
+        # Usamos VERDE_BANDERA si existe, si no el verde normal
+        color = VERDE_BANDERA if 'VERDE_BANDERA' in globals() else VERDE
+        pygame.draw.rect(pantalla, color, self.rect) #La bandera es verde
         pygame.draw.rect(pantalla, NEGRO, self.rect, 2) #Borde de la bandera

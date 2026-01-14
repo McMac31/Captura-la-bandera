@@ -19,6 +19,9 @@ class Servidor:
         
         # ID para asignar a los jugadores según van llegando (1, 2, 3, 4)
         self.id_actual = 1 
+        
+        # --- NUEVO: Control de la Bandera ---
+        self.dueno_bandera = None # ID del jugador que tiene la bandera actualmente
     
     #Funcion para manejar a un cliente
     def manejar_cliente(self, conexion, direccion, id_jugador):
@@ -37,7 +40,26 @@ class Servidor:
                     try:
                         data = json.loads(mensaje) #Decodificamos el JSON recibido
                         
-                        if "posicion" in data:
+                        # --- LÓGICA DE ÁRBITRO ---
+                        if "evento" in data:
+                            # Si alguien pide la bandera
+                            if data["evento"] == "PETICION":
+                                # Solo se la damos si NADIE la tiene
+                                if self.dueno_bandera is None:
+                                    self.dueno_bandera = id_jugador
+                                    print(f"ARBITRO: Bandera asignada al Jugador {id_jugador}")
+                                    
+                                    # Avisamos a TODOS de quién es el nuevo dueño con un evento COGER
+                                    msg_oficial = {"evento": "COGER", "id": id_jugador}
+                                    self.broadcast_estado(id_jugador, msg_oficial)
+                            
+                            # Si hay un RESET (Gol o Robo), liberamos la bandera
+                            elif data["evento"] == "RESET":
+                                self.dueno_bandera = None
+                                self.broadcast_estado(id_jugador, data)
+
+                        # Si es movimiento normal, retransmitimos
+                        elif "posicion" in data:
                             self.jugadores_info[id_jugador] = data["posicion"]
                             self.broadcast_estado(id_jugador, data)
                             
@@ -57,6 +79,9 @@ class Servidor:
                 self.clientes.remove(conexion)
             if id_jugador in self.jugadores_info:
                 del self.jugadores_info[id_jugador]
+            # Si se va el que tiene la bandera, la liberamos
+            if self.dueno_bandera == id_jugador:
+                self.dueno_bandera = None
             conexion.close()
 
     def broadcast_estado(self, id_origen, data):
