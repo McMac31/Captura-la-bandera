@@ -2,7 +2,14 @@ from logica.juego import Juego
 from email_validator import validate_email, EmailNotValidError
 # Punto de entrada del juego
 if __name__ == "__main__":
-    nombre_jugador=input("Ingrese su nombre: ")
+    
+    #Validacion de nombre y email
+    while True:
+        nombre_jugador = input("Ingrese su nombre: ").strip() # Usamos strip para quitar espacios extras
+        if nombre_jugador: # Si la cadena no está vacía
+            break
+        else:
+            print("El nombre no puede estar vacío. Por favor, ingrese un nombre.")
 
     while True:
         try:
