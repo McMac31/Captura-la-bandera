@@ -2,16 +2,16 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard - Jugador {{ juego.mi_id }}</title>
+    <title>Estadisticas Partida - Jugador {{ juego.mi_id }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> <!-- Enlace al archivo CSS -->
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='imgs/BanderaFavicon.png') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='imgs/BanderaFavicon.png') }}">
     <meta http-equiv="refresh" content="1"> <!-- Se refresca cada segundo -->
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>🎮 CAPTURA LA BANDERA</h1>
-            <p>Panel de Control - <strong>ID: {{ juego.mi_id }} ({{ juego.nombrelocal }})</strong></p>
+            <p>Jugador: - <strong>ID: {{ juego.mi_id }} ({{ juego.nombrelocal }})</strong></p>
         </div>
 
         <div class="status-grid">
