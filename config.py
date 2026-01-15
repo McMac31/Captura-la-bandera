@@ -74,7 +74,6 @@ OBSTACULOS = generar_obstaculos()
 TECLAS_LOCAL = {'arriba': pygame.K_w, 'abajo': pygame.K_s, 'izq': pygame.K_a, 'der': pygame.K_d}
 
 #Configuracion de red
-
-SERVIDOR_IP = "192.168.24.219" 
+SERVIDOR_IP = "192.168.24.219"
 PUERTO=8000
 DIRECCION_SERVIDOR = (SERVIDOR_IP, PUERTO)
