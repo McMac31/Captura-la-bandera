@@ -11,20 +11,20 @@ class APIService:
             return r.status_code in (200, 201)
         except: return False
 
-    def obtener_ranking(self):
+    def get_ranking(self):
         try:
             # Nota: La URL correcta según tu ApiPsql.py es /jugadores/ranking
             r = requests.get(f"{self.url_base}/jugadores/ranking", timeout=5)
             return r.json() if r.status_code == 200 else []
         except: return []
 
-    def obtener_partidas(self):
+    def get_partidas(self):
         try:
             r = requests.get(f"{self.url_base}/partidas", timeout=5)
             return r.json() if r.status_code == 200 else []
         except: return []
 
-    def obtener_estadisticas_globales(self):
+    def get_estadisticas_globales(self):
         try:
             r = requests.get(f"{self.url_base}/estadisticas", timeout=5)
             return r.json() if r.status_code == 200 else {}
@@ -36,3 +36,21 @@ class APIService:
             requests.post(f"{self.url_base}/partidas", json=datos_partida, timeout=2)
         except requests.exceptions.RequestException as e:
             print(f"Error de conexión con AWS: {e}")
+    
+    def get_jugadores(self):
+        try:
+            r = requests.get(f"{self.url_base}/jugadores", timeout=5)
+            return r.json() if r.status_code == 200 else []
+        except: return []
+
+    def get_historial_jugador(self, jugador_id):
+        try:
+            r = requests.get(f"{self.url_base}/jugadores/{jugador_id}/estadisticas", timeout=5)
+            return r.json() if r.status_code == 200 else {}
+        except: return {}
+    
+    def eliminar_jugador(self, jugador_id):
+        try:
+            r = requests.delete(f"{self.url_base}/jugadores/{jugador_id}", timeout=5)
+            return r.status_code == 200
+        except: return False

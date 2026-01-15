@@ -26,7 +26,7 @@ class ServerFlask(threading.Thread):
         def inicio():
             # Pasamos el objeto juego a la plantilla
             api=APIService()
-            ranking=api.obtener_ranking()
+            ranking=api.get_ranking()
             return render_template('index.html', juego=self.juego, ranking=ranking)
 
         # Ruta API: Devuelve el estado del juego en JSON 
@@ -62,22 +62,21 @@ class ServerFlask(threading.Thread):
         @app.route('/ranking')
         def ver_ranking():
             api = APIService()
-            datos_ranking = api.obtener_ranking()
+            datos_ranking = api.get_ranking()
             # Usamos el template ranking.html que ya tienes creado
             return render_template('ranking.html', ranking=datos_ranking)
 
         @app.route('/partidas')
         def ver_partidas():
             api = APIService()
-            lista_partidas = api.obtener_partidas()
-            # Aquí podrías crear un template partidas.html
-            return jsonify(lista_partidas) 
+            lista_partidas = api.get_partidas()
+            return render_template('partidas.html', partidas=lista_partidas)
 
         @app.route('/estadisticas')
         def ver_stats():
             api = APIService()
-            stats = api.obtener_estadisticas_globales()
-            return jsonify(stats)
+            datos_stats = api.get_estadisticas_globales()
+            return render_template('estadisticas.html', stats=datos_stats)
 
         # Configuración del puerto dinámico basado en ID
         puerto = 5000 + self.juego.mi_id
@@ -85,3 +84,13 @@ class ServerFlask(threading.Thread):
         
         # Ejecutamos Flask
         app.run(host='0.0.0.0', port=puerto, debug=True, use_reloader=False)
+
+        @app.route('/eliminar/<int:id>')
+        def borrar_jugador(id):
+            api = APIService()
+            if api.eliminar_jugador(id):
+                # Si se borra con éxito, volvemos al ranking para ver el cambio
+                from flask import redirect, url_for
+                return redirect(url_for('ver_ranking'))
+            else:
+                return f"Error al eliminar al jugador {id}", 500

@@ -258,12 +258,15 @@ class Juego:
                 }
                 
                 self.red.enviar(datos_puntuar)
-                def guardar_en_segundo_plano(datos):
+                # 2. Enviar a la API en un hilo aparte (Evita el lag)
+                def tarea_api():
                     api_temp = APIService()
-                    api_temp.guardar_partida(datos)
-                    hilo_api = threading.Thread(target=guardar_en_segundo_plano, args=(datos_puntuar,))
-                    hilo_api.start()
+                    # Aquí podrías adaptar los datos según lo que reciba tu postPartida.py
+                    api_temp.guardar_partida(datos_puntuar)
                 
+                hilo = threading.Thread(target=tarea_api, daemon=True)
+                hilo.start()
+                    
             
 
     # Funcion para resetear la ronda

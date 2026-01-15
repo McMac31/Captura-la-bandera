@@ -1,11 +1,24 @@
 <div class="ranking-box">
     <h2>RANKING GLOBAL</h2>
-    <table>
+    <table border="1" style="margin: auto; width: 90%;">
+        <tr>
+            <th>Nombre</th>
+            <th>Puntos</th>
+            <th>Acción</th> </tr>
         {% for j in ranking %}
         <tr>
             <td>{{ j.nombre }}</td>
             <td>{{ j.scoreTotal }} pts</td>
+            <td>
+                <a href="/eliminar/{{ j.id }}" 
+                   onclick="return confirm('¿Seguro que quieres borrar a este jugador?')" 
+                   style="color: #e94560; text-decoration: none; font-weight: bold;">
+                   [ ELIMINAR ]
+                </a>
+            </td>
         </tr>
         {% endfor %}
     </table>
+    <br>
+    <a href="/" class="btn">Volver</a>
 </div>
