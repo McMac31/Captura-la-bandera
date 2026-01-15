@@ -3,18 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Dashboard - Jugador {{ juego.mi_id }}</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1a2e; color: white; text-align: center; }
-        .container { max-width: 800px; margin: auto; padding: 20px; }
-        .header { background-color: #16213e; padding: 20px; border-radius: 10px; border-bottom: 4px solid #e94560; }
-        .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
-        .card { background-color: #0f3460; padding: 15px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
-        .local { border: 2px solid #00ff41; }
-        .puntos { font-size: 2em; font-weight: bold; color: #e94560; }
-        .bandera-box { margin-top: 30px; padding: 15px; background-color: #533483; border-radius: 10px; }
-        .btn { display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #e94560; color: white; text-decoration: none; border-radius: 5px; }
-    </style>
-    <meta http-equiv="refresh" content="2">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta http-equiv="refresh" content="1"> <!-- Se refresca cada segundo -->
 </head>
 <body>
     <div class="container">
@@ -35,7 +25,7 @@
         </div>
 
         <div class="bandera-box">
-            <h2>🚩 ESTADO DE LA BANDERA</h2>
+            <h2>🟩 ESTADO DE LA BANDERA 🟩</h2>
             {% if juego.bandera.portador %}
                 <p>La tiene: <strong>{{ juego.bandera.portador.NombreJugador }}</strong></p>
             {% else %}

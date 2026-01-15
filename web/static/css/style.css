@@ -1,0 +1,72 @@
+       /* Estilo General */
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    background-color: #1a1a2e; 
+    color: white; 
+    text-align: center; 
+}
+
+/*Contenedor*/
+.container { 
+    max-width: 800px; 
+    margin: auto; 
+    padding: 20px; 
+}
+
+/* Encabezado */
+.header { 
+    background-color: #16213e; 
+    padding: 20px; 
+    border-radius: 10px; 
+    border-bottom: 4px solid #e94560; 
+}
+
+/* Rejilla de Jugadores */
+.status-grid {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(1, 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    display: grid; 
+    gap: 20px; 
+    margin-top: 30px; 
+    
+}
+/**/
+.card { 
+    background-color: #0f3460; 
+    padding: 15px; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3); 
+}
+
+.local { 
+    border: 2px solid #e94560; 
+}
+
+.puntos { 
+    font-size: 2em; 
+    font-weight: bold; 
+    color: #e94560; 
+}
+
+/* Caja de la Bandera */
+.bandera-box { 
+    margin-top: 30px; 
+    padding: 15px; 
+    background-color:#16213e ; 
+    border-radius: 10px; 
+    border: 2px solid #00ff41;; 
+
+
+}
+
+.btn { 
+    display: inline-block; 
+    margin-top: 20px; 
+    padding: 10px 20px; 
+    background-color: #e94560;
+    color: white; 
+    text-decoration: none; 
+    border-radius: 5px; 
+}

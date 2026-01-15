@@ -12,8 +12,13 @@ class ServerFlask(threading.Thread):
 
     def run(self):
         # Esta función se ejecuta al hacer .start() desde el juego
-        template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'templates'))
-        app = Flask(__name__, template_folder=template_dir)
+        base_dir = os.path.dirname(__file__)
+        template_dir = os.path.abspath(os.path.join(base_dir, 'templates'))
+        # --- NUEVO: Definimos la carpeta de archivos estaticos (CSS) ---
+        static_dir = os.path.abspath(os.path.join(base_dir, 'static'))
+        
+        # Iniciamos Flask con las carpetas configuradas
+        app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 
         # Ruta Principal Muestra la página web
         @app.route('/')
