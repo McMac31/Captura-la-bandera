@@ -56,7 +56,7 @@ class Jugador:
         # Lógica de intercepción de la bandera
         if self.rect.colliderect(enemigo.rect):
             if bandera.portador == enemigo:
-                print(f"¡Cazado! {self.color} atrapó a {enemigo.color}.")
+                print(f"{self.NombreJugador} atrapó a {enemigo.NombreJugador}.")
                 bandera.reiniciar()
                 # AQUI ESTA EL CAMBIO: Reiniciamos a LOS DOS
                 self.reiniciar_posicion() # El cazador vuelve a casa

@@ -32,7 +32,7 @@ class ClienteRed:
             if data["tipo"] == "BIENVENIDA":
                 self.id = data["id"]
                 self.conectado = True
-                print(f"[RED] Conectado al servidor con ID: {self.id}")
+                print(f"[RED] Conectado al servidor con ID... {self.id}")
 
                 # Guardamos el mapa si viene en el mensaje
                 if "mapa" in data:

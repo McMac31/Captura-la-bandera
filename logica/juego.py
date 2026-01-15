@@ -137,7 +137,7 @@ class Juego:
                 if evento == "COGER" and "id" in mensaje:
                     id_ganador = mensaje["id"]
                     if id_ganador in self.jugadores:
-                        print(f"Evento: La bandera es del Jugador {id_ganador}") 
+                        print(f"La bandera es de {self.jugadores[id_ganador].NombreJugador} ID: {id_ganador}") 
                         self.bandera.portador = self.jugadores[id_ganador] #le damos la bandera al jugador correspondiente
                 
                 # Evento RESET 
@@ -152,13 +152,13 @@ class Juego:
                     hubo_reset = True
                     continue 
 
-                # --- NUEVO: JUGADOR DESCONECTADO (Limpiar Slot) ---
+                #JUGADOR DESCONECTADO 
                 elif evento == "SALIDA":
                     if "id" in mensaje:
                         id_salida = mensaje["id"]
                         # Si alguien se fue, borramos su muñeco y liberamos memoria en cliente
                         if id_salida in self.jugadores and id_salida != self.mi_id:
-                            print(f"Jugador {id_salida} desconectado. Eliminando sprite.")
+                            print(f"Jugador {self.nombrelocal} {id_salida} desconectado. Eliminando sprite.")
                             del self.jugadores[id_salida]
                     continue
 
@@ -246,7 +246,7 @@ class Juego:
             # Si anotó, incrementamos puntos y reseteamos ronda
             if anoto_punto:
                 portador.puntos += 1
-                print(f"¡Jugador {portador.id} ({portador.color}) anotó un punto!")
+                print(f"{portador.NombreJugador} con ID: {portador.id} anotó un punto!")
                 self.resetear_ronda()
                 datos_puntuar = {
                     'id': self.mi_id,
