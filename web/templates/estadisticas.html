@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Estadísticas Globales - Captura la Bandera</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 ESTADÍSTICAS GLOBALES</h1>
+            <p>Datos consolidados del servidor Spring Boot</p>
+        </div>
+
+        <div class="status-grid">
+            <div class="card">
+                <h3>Total Jugadores</h3>
+                <div class="puntos">{{ stats.totalJugadores }}</div>
+            </div>
+
+            <div class="card">
+                <h3>Total Partidas</h3>
+                <div class="puntos">{{ stats.totalPartidas }}</div>
+            </div>
+        </div>
+
+        <div class="bandera-box">
+            <h2>📈 Promedios de Juego</h2>
+            <div style="text-align: left; padding: 10px;">
+                <p><strong>Promedio Jugadores por Partida:</strong> {{ stats.promedioJugadoresPorPartida }}</p>
+                <p><strong>Promedio Score por Partida:</strong> {{ stats.promedioScorePorPartida }}</p>
+                <p><strong>Promedio Duración:</strong> {{ stats.promedioDuracionPorPartida }}s</p>
+            </div>
+        </div>
+
+        <nav>
+            <a href="/" class="btn">Volver</a>
+        </nav>
+    </div>
+</body>
+</html>

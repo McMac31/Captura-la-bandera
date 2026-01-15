@@ -1,24 +1,31 @@
-<div class="ranking-box">
-    <h2>RANKING GLOBAL</h2>
-    <table border="1" style="margin: auto; width: 90%;">
-        <tr>
-            <th>Nombre</th>
-            <th>Puntos</th>
-            <th>Acción</th> </tr>
-        {% for j in ranking %}
-        <tr>
-            <td>{{ j.nombre }}</td>
-            <td>{{ j.scoreTotal }} pts</td>
-            <td>
-                <a href="/eliminar/{{ j.id }}" 
-                   onclick="return confirm('¿Seguro que quieres borrar a este jugador?')" 
-                   style="color: #e94560; text-decoration: none; font-weight: bold;">
-                   [ ELIMINAR ]
-                </a>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-    <br>
-    <a href="/" class="btn">Volver</a>
-</div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ranking Global</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> <link rel="icon" type="image/png" href="{{ url_for('static', filename='imgs/BanderaFavicon.png') }}">
+</head>
+<body>
+    <div class="container"> <div class="header"> <h1>🏆 RANKING GLOBAL</h1>
+        </div>
+
+        <div class="card" style="margin-top: 20px;"> <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Puntos</th>
+                    <th>Gestión</th>
+                </tr>
+                {% for j in ranking %}
+                <tr style="border-bottom: 1px solid #16213e;">
+                    <td>{{ j.nombre }}</td>
+                    <td class="puntos">{{ j.scoreTotal }}</td> <td>
+                        <a href="/eliminar/{{ j.id }}" onclick="return confirm('¿Borrar HPTA?')" style="color: #e94560;">[X]</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <a href="/" class="btn">Volver</a> </div>
+</body>
+</html>

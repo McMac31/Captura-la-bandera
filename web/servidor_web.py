@@ -24,10 +24,7 @@ class ServerFlask(threading.Thread):
         # Ruta Principal Muestra la página web
         @app.route('/')
         def inicio():
-            # Pasamos el objeto juego a la plantilla
-            api=APIService()
-            ranking=api.get_ranking()
-            return render_template('index.html', juego=self.juego, ranking=ranking)
+            return render_template('index.html', juego=self.juego)
 
         # Ruta API: Devuelve el estado del juego en JSON 
         @app.route('/api/estado')

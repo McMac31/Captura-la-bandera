@@ -3,10 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Estadisticas Partida - Jugador {{ juego.mi_id }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> <!-- Enlace al archivo CSS -->
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='imgs/BanderaFavicon.png') }}"> <!-- Favicon -->
-    <meta http-equiv="refresh" content="1"> <!-- Se refresca cada segundo -->
-</head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> <link rel="icon" type="image/png" href="{{ url_for('static', filename='imgs/BanderaFavicon.png') }}"> </head>
 <body>
     <div class="container">
         <div class="header">
@@ -19,7 +16,7 @@
             <div class="card {{ 'local' if j.es_local else '' }}">
                 <h3>{{ j.NombreJugador }}</h3>
                 <p>ID: {{ j.id }}</p>
-                <div class="puntos">{{ j.puntos }}</div>
+                <div class="puntos" id="puntos-{{ j.id }}">{{ j.puntos }}</div>
                 <p>Posición: {{ j.rect.x }}, {{ j.rect.y }}</p>
             </div>
             {% endfor %}
@@ -27,18 +24,24 @@
 
         <div class="bandera-box">
             <h2>🟩 ESTADO DE LA BANDERA 🟩</h2>
-            {% if juego.bandera.portador %}
-                <p>La tiene: <strong>{{ juego.bandera.portador.NombreJugador }}</strong></p>
-            {% else %}
-                <p>Estado: <strong>LIBRE EN EL CENTRO</strong></p>
-            {% endif %}
+            <p id="bandera-info">
+                {% if juego.bandera.portador %}
+                    La tiene: <strong>{{ juego.bandera.portador.NombreJugador }}</strong>
+                {% else %}
+                    Estado: <strong>LIBRE EN EL CENTRO</strong>
+                {% endif %}
+            </p>
             <p>Ubicación: ({{ juego.bandera.rect.x }}, {{ juego.bandera.rect.y }})</p>
         </div>
 
-        <a href="/api/estado" class="btn">Ver JSON Crudo</a>
-        <a href="/ranking" class="btn"> Ver Ranking</a>
-        <a href="/partidas" class="btn">Historial Partidas</a>
-        <a href="/estadisticas" class="btn"> Estadísticas Globales</a>
+        <div class="menu-acciones" style="margin-top: 20px;">
+            <a href="/api/estado" class="btn">Ver JSON Crudo</a>
+            <a href="/ranking" class="btn">Ver Ranking</a>
+            <a href="/partidas" class="btn">Historial Partidas</a>
+            <a href="/estadisticas" class="btn">Estadísticas Globales</a>
+        </div>
     </div>
+
+    <script src="{{ url_for('static', filename='script/refrescar.js') }}" defer></script>
 </body>
 </html>
