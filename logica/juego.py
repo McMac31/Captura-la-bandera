@@ -1,3 +1,4 @@
+import threading
 import pygame
 import sys
 from config import *
@@ -257,7 +258,12 @@ class Juego:
                 }
                 
                 self.red.enviar(datos_puntuar)
-                api.guardar_partida(datos_puntuar)
+                def guardar_en_segundo_plano(datos):
+                    api_temp = APIService()
+                    api_temp.guardar_partida(datos)
+                    hilo_api = threading.Thread(target=guardar_en_segundo_plano, args=(datos_puntuar,))
+                    hilo_api.start()
+                
             
 
     # Funcion para resetear la ronda

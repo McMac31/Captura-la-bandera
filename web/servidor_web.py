@@ -59,6 +59,26 @@ class ServerFlask(threading.Thread):
                 "bandera": info_bandera
             })
 
+        @app.route('/ranking')
+        def ver_ranking():
+            api = APIService()
+            datos_ranking = api.obtener_ranking()
+            # Usamos el template ranking.html que ya tienes creado
+            return render_template('ranking.html', ranking=datos_ranking)
+
+        @app.route('/partidas')
+        def ver_partidas():
+            api = APIService()
+            lista_partidas = api.obtener_partidas()
+            # Aquí podrías crear un template partidas.html
+            return jsonify(lista_partidas) 
+
+        @app.route('/estadisticas')
+        def ver_stats():
+            api = APIService()
+            stats = api.obtener_estadisticas_globales()
+            return jsonify(stats)
+
         # Configuración del puerto dinámico basado en ID
         puerto = 5000 + self.juego.mi_id
         print(f" Servidor iniciado en http://localhost:{puerto}")
