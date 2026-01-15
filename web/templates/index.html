@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Estadisticas Partida - Jugador {{ juego.mi_id }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> <link rel="icon" type="image/png" href="{{ url_for('static', filename='imgs/BanderaFavicon.png') }}"> </head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='imgs/BanderaFavicon.png') }}">
+</head>
 <body>
     <div class="container">
         <div class="header">
@@ -17,7 +19,7 @@
                 <h3>{{ j.NombreJugador }}</h3>
                 <p>ID: {{ j.id }}</p>
                 <div class="puntos" id="puntos-{{ j.id }}">{{ j.puntos }}</div>
-                <p>Posición: {{ j.rect.x }}, {{ j.rect.y }}</p>
+                <p>Posición: <span id="pos-{{ j.id }}">{{ j.rect.x }}, {{ j.rect.y }}</span></p>
             </div>
             {% endfor %}
         </div>
@@ -31,7 +33,7 @@
                     Estado: <strong>LIBRE EN EL CENTRO</strong>
                 {% endif %}
             </p>
-            <p>Ubicación: ({{ juego.bandera.rect.x }}, {{ juego.bandera.rect.y }})</p>
+            <p>Ubicación: (<span id="bandera-pos">{{ juego.bandera.rect.x }}, {{ juego.bandera.rect.y }}</span>)</p>
         </div>
 
         <div class="menu-acciones" style="margin-top: 20px;">
