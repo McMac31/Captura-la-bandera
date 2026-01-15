@@ -1,6 +1,7 @@
 import threading
 from flask import Flask, jsonify, render_template
 import os
+from API.api_servicio import APIService
 
 class ServerFlask(threading.Thread):
     def __init__(self, juego_instancia):
@@ -24,7 +25,9 @@ class ServerFlask(threading.Thread):
         @app.route('/')
         def inicio():
             # Pasamos el objeto juego a la plantilla
-            return render_template('index.html', juego=self.juego)
+            api=APIService()
+            ranking=api.obtener_ranking()
+            return render_template('index.html', juego=self.juego, ranking=ranking)
 
         # Ruta API: Devuelve el estado del juego en JSON 
         @app.route('/api/estado')

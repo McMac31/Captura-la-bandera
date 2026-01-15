@@ -1,7 +1,9 @@
 from logica.juego import Juego
 from email_validator import validate_email, EmailNotValidError
+from API.api_servicio import APIService
 # Punto de entrada del juego
 if __name__ == "__main__":
+    api=APIService()
     
     #Validacion de nombre y email
     while True:
@@ -19,4 +21,5 @@ if __name__ == "__main__":
         except EmailNotValidError:
             print("Email inválido ingrese un formato correcto.")
     CapturaBandera=Juego(nombre_jugador,email_jugador)
+    api.registrar_jugador(nombre_jugador,email_jugador)
     CapturaBandera.correr()

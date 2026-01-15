@@ -1,0 +1,11 @@
+<div class="ranking-box">
+    <h2>🏆 RANKING GLOBAL</h2>
+    <table>
+        {% for j in ranking %}
+        <tr>
+            <td>{{ j.nombre }}</td>
+            <td>{{ j.scoreTotal }} pts</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>

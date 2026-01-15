@@ -5,6 +5,7 @@ from entidades.jugador import Jugador
 from entidades.bandera import Bandera
 from red.cliente_red import ClienteRed
 from web.servidor_web import ServerFlask
+from API.api_servicio import APIService
 
 # Clase principal del juego
 class Juego:
@@ -245,6 +246,7 @@ class Juego:
                 anoto_punto = True
             # Si anotó, incrementamos puntos y reseteamos ronda
             if anoto_punto:
+                api=APIService()
                 portador.puntos += 1
                 print(f"{portador.NombreJugador} con ID: {portador.id} anotó un punto!")
                 self.resetear_ronda()
@@ -253,7 +255,9 @@ class Juego:
                     'evento': 'RESET',         # Indicamos que es un reset de ronda
                     'puntos': portador.puntos   # Enviamos el dato actualizado
                 }
+                
                 self.red.enviar(datos_puntuar)
+                api.guardar_partida(datos_puntuar)
             
 
     # Funcion para resetear la ronda
