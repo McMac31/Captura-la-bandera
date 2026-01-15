@@ -1,16 +1,41 @@
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-<div class="container">
-    <h1>🎮 Historial de Partidas</h1>
-    <table class="card" style="width: 100%">
-        <tr><th>ID</th><th>Duración</th><th>Jugadores</th><th>Scores</th></tr>
-        {% for p in partidas %}
-        <tr>
-            <td>{{ p.id }}</td>
-            <td>{{ p.duracion }}s</td>
-            <td>{{ p.jugadorIds | join(', ') }}</td>
-            <td>{{ p.scores | join(' - ') }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    <a href="/" class="btn">Volver</a>
-</div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Historial de Partidas - Captura la Bandera</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='imgs/BanderaFavicon.png') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 HISTORIAL DE PARTIDAS</h1>
+        </div>
+
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Duración</th>
+                        <th>Jugadores</th>
+                        <th>Scores</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in partidas %}
+                    <tr>
+                        <td>{{ p.id }}</td>
+                        <td>{{ p.duracion }}s</td>
+                        <td>{{ p.jugadorIds | join(', ') }}</td>
+                        <td>{{ p.scores | join(' - ') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <a href="/" class="btn">Volver al Monitor</a>
+    </div>
+</body>
+</html>

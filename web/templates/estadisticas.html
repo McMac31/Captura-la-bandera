@@ -23,15 +23,14 @@
                 <div class="puntos">{{ stats.totalPartidas }}</div>
             </div>
         </div>
-
         <div class="bandera-box">
-            <h2>📈 Promedios de Juego</h2>
-            <div style="text-align: left; padding: 10px;">
-                <p><strong>Promedio Jugadores por Partida:</strong> {{ stats.promedioJugadoresPorPartida }}</p>
-                <p><strong>Promedio Score por Partida:</strong> {{ stats.promedioScorePorPartida }}</p>
-                <p><strong>Promedio Duración:</strong> {{ stats.promedioDuracionPorPartida }}s</p>
-            </div>
-        </div>
+    <h2>📈 Promedios de Juego</h2>
+    <div style="text-align: left; padding: 10px;">
+        <p><strong>Promedio Jugadores por Partida:</strong> {{ stats.promedioJugadoresPorPartida | round(2) }}</p>
+        <p><strong>Promedio Score por Partida:</strong> {{ stats.promedioScorePorPartida | round(2) }}</p>
+        <p><strong>Promedio Duración:</strong> {{ stats.promedioDuracionPorPartida | round(2) }}s</p>
+    </div>
+</div>
 
         <nav>
             <a href="/" class="btn">Volver</a>

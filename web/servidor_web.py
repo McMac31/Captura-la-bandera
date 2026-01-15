@@ -74,17 +74,14 @@ class ServerFlask(threading.Thread):
             api = APIService()
             datos_stats = api.get_estadisticas_globales()
             return render_template('estadisticas.html', stats=datos_stats)
-        
-        
-        @app.route('/eliminar/<int:id>')
-        def borrar_jugador(id):
+
+        @app.route('/eliminar/<id_jugador>') # Ruta flexible
+        def borrar_jugador(id_jugador):
             api = APIService()
-            if api.eliminar_jugador(id):
-                # Si se borra con éxito, volvemos al ranking para ver el cambio
+            if api.eliminar_jugador(id_jugador):
                 from flask import redirect, url_for
                 return redirect(url_for('ver_ranking'))
-            else:
-                return f"Error al eliminar al jugador {id}", 500
+            return "Error", 500
 
         # Configuración del puerto dinámico basado en ID
         puerto = 5000 + self.juego.mi_id
