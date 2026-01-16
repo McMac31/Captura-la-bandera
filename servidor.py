@@ -17,7 +17,6 @@ class Servidor:
         self.clientes = [] # Lista de sockets conectados
         self.direcciones = {} # Mapa de direcciones {socket: direccion}
         self.jugadores_info = {} # Datos del juego {id_jugador: {x, y, color...}}
-        
         # Maximo 4 jugadores (IDs del 1 al 4)
         self.ids_disponibles = [1, 2, 3, 4] 
         
@@ -54,6 +53,8 @@ class Servidor:
                     
                     try:
                         data = json.loads(mensaje) #Decodificamos el JSON recibido
+                        if "puntos" in data:
+                            self.historial_puntos[id_jugador] = data["puntos"]
                         
                         # Si es un evento especial
                         if "evento" in data:
@@ -156,48 +157,45 @@ class Servidor:
                 conexion.close()
     
     def finalizar_partida_aws(self):
+        # 1. Calculamos duración final
         duracion = int(time.time() - self.tiempo_inicio_sesion)
-        # Preparamos las listas basadas en lo que recolectamos
-        ids = list(self.ids_jugadores_sesion)
-        # Obtenemos los puntos de cada uno (si no enviaron nada, ponemos 0)
-        puntajes = [self.historial_puntos.get(pid, 0) for pid in ids]
         
-        # Buscamos quién tuvo más puntos para el campo "id" (ganador)
+        # 2. Preparamos las listas de IDs y Scores
+        ids = list(self.ids_jugadores_sesion)
+        # Obtenemos los puntos guardados o 0 si el jugador no anotó nunca
+        lista_scores = [self.historial_puntos.get(pid, 0) for pid in ids]
+        
+        # 3. Determinamos el ganador (el ID con más puntos)
         id_ganador = ids[0] if ids else 0
-        if puntajes:
-            max_puntaje = max(puntajes)
-            indice_ganador = puntajes.index(max_puntaje)
-            id_ganador = ids[indice_ganador]
+        if lista_scores:
+            max_p = max(lista_scores)
+            id_ganador = ids[lista_scores.index(max_p)]
 
+        # 4. Estructura EXACTA para tu Spring Boot
         datos_finales = {
             "duracion": duracion,
             "id": id_ganador,
             "jugadorIds": ids,
-            "puntajes": puntajes
+            "scores": lista_scores  # Cambiado de 'puntajes' a 'scores'
         }
 
-        print(f"[AWS] Sala vacía. Enviando partida final de {duracion}s...")
-        try:
-            # URL de Spring Boot
-            requests.post("http://35.171.209.196:8080/api/partidas", json=datos_finales, timeout=5)
-            print("[AWS] Partida guardada con éxito.")
-        except Exception as e:
-            print(f"[AWS] Error al guardar: {e}")
-        
-        # Reset para la próxima partida
-        self.tiempo_inicio_sesion = None
-        def envio_seguro(): # Envío en hilo aparte
+        # 5. Envío asíncrono usando Hilos para no congelar el servidor
+        def envio_hilo():
             try:
-                print("[AWS] Guardando historial final...")
-                # Esta llamada puede tardar segundos si la red va lenta
-                requests.post("http://35.171.209.196:8080/api/partidas", json=datos_finales, timeout=10)
-                print("[AWS] Éxito: Partida guardada.")
+                print(f"[AWS] Intentando guardar partida de {duracion}s...")
+                r = requests.post("http://35.171.209.196:8080/api/partidas", json=datos_finales, timeout=10)
+                if r.status_code in (200, 201):
+                    print("[AWS] ¡Éxito! Partida guardada correctamente.")
+                else:
+                    print(f"[AWS] Error del servidor: {r.status_code} - {r.text}")
             except Exception as e:
-                print(f"[AWS] Error: No se pudo guardar la sesión: {e}")
-        # Lanzamos la tarea en un hilo aparte para que el servidor siga libre
-        # Esto facilita que si alguien intenta entrar justo ahora, el servidor responda al instante
-        hilo_aws = threading.Thread(target=envio_seguro, daemon=True) # Daemon para que no bloquee la salida
-        hilo_aws.start() #Iniciamos el hilo
+                print(f"[AWS] Fallo crítico de conexión: {e}")
+
+        # Lanzamos el hilo
+        threading.Thread(target=envio_hilo, daemon=True).start()
+        
+        # Reset para la siguiente sesión
+        self.tiempo_inicio_sesion = None
 
 if __name__ == "__main__":
     s = Servidor()
