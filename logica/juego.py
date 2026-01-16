@@ -230,11 +230,9 @@ class Juego:
     # Verificar si algún jugador ha anotado
     def verificar_puntos(self):
         portador = self.bandera.portador
-        
         # Solo verificamos si nosotros llevamos la bandera 
         if portador and portador.es_local:
             anoto_punto = False
-            
             # Verificamos colisión con la base correspondiente según el ID
             if portador.id == 1 and portador.rect.colliderect(BASE_ROJA):
                 anoto_punto = True
@@ -246,25 +244,17 @@ class Juego:
                 anoto_punto = True
             # Si anotó, incrementamos puntos y reseteamos ronda
             if anoto_punto:
-                api=APIService()
                 portador.puntos += 1
                 print(f"{portador.NombreJugador} con ID: {portador.id} anotó un punto!")
                 self.resetear_ronda()
+                
                 datos_puntuar = {
                     'id': self.mi_id,
                     'evento': 'RESET',         # Indicamos que es un reset de ronda
                     'puntos': portador.puntos   # Enviamos el dato actualizado
                 }
-                
+                # Enviamos el dato actualizado al servidor de red para que registre los puntos
                 self.red.enviar(datos_puntuar)
-                # 2. Enviar a la API en un hilo aparte (Evita el lag)
-                def tarea_api():
-                    api_temp = APIService()
-                    # Aquí podrías adaptar los datos según lo que reciba tu postPartida.py
-                    api_temp.guardar_partida(datos_puntuar)
-                
-                hilo = threading.Thread(target=tarea_api, daemon=True)
-                hilo.start()
                     
     # Funcion para resetear la ronda
     def resetear_ronda(self):

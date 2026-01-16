@@ -2,6 +2,7 @@ import socket
 import threading
 import json
 import time
+import requests
 from config import *
 
 #Clase Servidor de Red
@@ -25,10 +26,21 @@ class Servidor:
 
         # Generamos el mapa una sola vez para enviarlo a todos
         self.mapa_obstaculos = [(m.x, m.y, m.w, m.h) for m in OBSTACULOS]
+
+        self.tiempo_inicio_sesion = None
+        self.historial_puntos = {} # Guardará {id_jugador: puntos}
+        self.ids_jugadores_sesion = set() # Todos los que pasaron por la partida
     
     #Funcion para manejar a un cliente
     def manejar_cliente(self, conexion, direccion, id_jugador):
         print(f"[CONEXIÓN] {direccion} ID: {id_jugador}")
+        # Iniciamos contador de tiempo y puntos apenas entra el primer jugador
+        if not self.clientes:
+            self.tiempo_inicio_sesion = time.time()
+            self.historial_puntos = {}
+            self.ids_jugadores_sesion = set()
+        
+        self.ids_jugadores_sesion.add(id_jugador)
         buffer = "" 
         try: #Control de excepciones
             while True:
@@ -77,6 +89,12 @@ class Servidor:
         # Cerramos la conexion del cliente
         finally:
             print(f"[SALIDA] Cliente {id_jugador} desconectado")
+            if conexion in self.clientes:
+                self.clientes.remove(conexion)
+            
+            # Si ya no queda nadie, enviamos a AWS
+            if not self.clientes and self.tiempo_inicio_sesion:
+                self.finalizar_partida_aws()
             if conexion in self.clientes:
                 self.clientes.remove(conexion)
             if id_jugador in self.jugadores_info:
@@ -136,6 +154,50 @@ class Servidor:
             else:
                 print(f"Rechazada conexión de {direccion}: Sala llena")
                 conexion.close()
+    
+    def finalizar_partida_aws(self):
+        duracion = int(time.time() - self.tiempo_inicio_sesion)
+        # Preparamos las listas basadas en lo que recolectamos
+        ids = list(self.ids_jugadores_sesion)
+        # Obtenemos los puntos de cada uno (si no enviaron nada, ponemos 0)
+        puntajes = [self.historial_puntos.get(pid, 0) for pid in ids]
+        
+        # Buscamos quién tuvo más puntos para el campo "id" (ganador)
+        id_ganador = ids[0] if ids else 0
+        if puntajes:
+            max_puntaje = max(puntajes)
+            indice_ganador = puntajes.index(max_puntaje)
+            id_ganador = ids[indice_ganador]
+
+        datos_finales = {
+            "duracion": duracion,
+            "id": id_ganador,
+            "jugadorIds": ids,
+            "puntajes": puntajes
+        }
+
+        print(f"[AWS] Sala vacía. Enviando partida final de {duracion}s...")
+        try:
+            # URL de Spring Boot
+            requests.post("http://35.171.209.196:8080/api/partidas", json=datos_finales, timeout=5)
+            print("[AWS] Partida guardada con éxito.")
+        except Exception as e:
+            print(f"[AWS] Error al guardar: {e}")
+        
+        # Reset para la próxima partida
+        self.tiempo_inicio_sesion = None
+        def envio_seguro(): # Envío en hilo aparte
+            try:
+                print("[AWS] Guardando historial final...")
+                # Esta llamada puede tardar segundos si la red va lenta
+                requests.post("http://35.171.209.196:8080/api/partidas", json=datos_finales, timeout=10)
+                print("[AWS] Éxito: Partida guardada.")
+            except Exception as e:
+                print(f"[AWS] Error: No se pudo guardar la sesión: {e}")
+        # Lanzamos la tarea en un hilo aparte para que el servidor siga libre
+        # Esto facilita que si alguien intenta entrar justo ahora, el servidor responda al instante
+        hilo_aws = threading.Thread(target=envio_seguro, daemon=True) # Daemon para que no bloquee la salida
+        hilo_aws.start() #Iniciamos el hilo
 
 if __name__ == "__main__":
     s = Servidor()
