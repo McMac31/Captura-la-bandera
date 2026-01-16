@@ -5,7 +5,6 @@ from config import *
 from entidades.jugador import Jugador
 from entidades.bandera import Bandera
 from red.cliente_red import ClienteRed
-from web.servidor_web import ServerFlask
 from API.api_servicio import APIService
 
 # Clase principal del juego
@@ -54,8 +53,6 @@ class Juego:
         
         # Definimos quiénes somos (por defecto el 1/Rojo para pruebas locales)
         self.crear_objetos()
-        self.servidor_web = ServerFlask(self)
-        self.servidor_web.start()  # Iniciamos el servidor web en un hilo
         
 
    # Creamos los objetos del juego

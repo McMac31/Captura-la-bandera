@@ -12,7 +12,7 @@
             <h1>🎮 HISTORIAL DE PARTIDAS</h1>
         </div>
 
-        <div class="card">
+        <div class="table">
             <table>
                 <thead>
                     <tr>
@@ -22,16 +22,14 @@
                         <th>Scores</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {% for p in partidas %} <!-- Iterar sobre las partidas -->
-                    <tr> <!-- Fila por cada partida -->
-                        <td>{{ p.id }}</td>
-                        <td>{{ p.duracion }}s</td>
-                        <td>{{ p.jugadorIds | join(', ') }}</td>
-                        <td>{{ p.scores | join(' - ') }}</td>
-                    </tr>
-                    {% endfor %} 
-                </tbody>
+               <tbody>
+                {% for p in partidas %} <tr> <td>{{ p.id }}</td>
+                    <td>{{ p.duracion }}s</td>
+                    <td>{{ p.nombres_jugadores | join(', ') }}</td> 
+                    <td>{{ p.scores | join(' - ') }}</td>
+                </tr>
+                {% endfor %} 
+            </tbody>
             </table>
         </div>
         
