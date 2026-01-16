@@ -17,6 +17,7 @@ class Juego:
         pygame.display.set_caption(TITULO)
         self.reloj = pygame.time.Clock()
         self.ejecutando = True
+        self.id_db = id_db
         
         # Control de LAG
         self.ultimo_envio = 0
@@ -119,6 +120,7 @@ class Juego:
                     datos={ #Datos a enviar
                         'id': self.mi_id,
                         'posicion':{"x": jugador_local.rect.x, "y": jugador_local.rect.y},
+                        'id_db': self.id_db,
                         'puntos': jugador_local.puntos,
                         'nombre': jugador_local.NombreJugador,
                         'email': jugador_local.EmailJugador}

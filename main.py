@@ -5,6 +5,7 @@ from API.api_servicio import APIService
 if __name__ == "__main__":
     api=APIService()
     
+    
     #Validacion de nombre y email
     while True:
         nombre_jugador = input("Ingrese su nombre: ").strip() # Usamos strip para quitar espacios extras
@@ -20,6 +21,9 @@ if __name__ == "__main__":
             break
         except EmailNotValidError:
             print("Email inválido ingrese un formato correcto.")
-    CapturaBandera=Juego(nombre_jugador,email_jugador)
-    api.registrar_jugador(nombre_jugador,email_jugador)
+
+    id_db = api.registrar_jugador(nombre_jugador, email_jugador)
+    if id_db:      
+        CapturaBandera=Juego(nombre_jugador,email_jugador)
+        api.registrar_jugador(nombre_jugador,email_jugador)
     CapturaBandera.correr()

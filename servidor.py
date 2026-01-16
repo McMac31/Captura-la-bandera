@@ -19,6 +19,7 @@ class Servidor:
         self.jugadores_info = {} # Datos del juego {id_jugador: {x, y, color...}}
         # Maximo 4 jugadores (IDs del 1 al 4)
         self.ids_disponibles = [1, 2, 3, 4] 
+        self.db_ids = {}
         
         # Control de la Bandera
         self.dueno_bandera = None # ID del jugador que tiene la bandera actualmente
@@ -34,14 +35,17 @@ class Servidor:
     def manejar_cliente(self, conexion, direccion, id_jugador):
         print(f"[CONEXIÓN] {direccion} ID: {id_jugador}")
         # Iniciamos contador de tiempo y puntos apenas entra el primer jugador
-        if not self.clientes:
+        if self.tiempo_inicio_sesion is None:
             self.tiempo_inicio_sesion = time.time()
             self.historial_puntos = {}
             self.ids_jugadores_sesion = set()
+            print("[SESIÓN] Cronómetro de partida iniciado.")
         
         self.ids_jugadores_sesion.add(id_jugador)
         buffer = "" 
         try: #Control de excepciones
+            if "id_db" in data:
+                self.db_ids[id_jugador] = data["id_db"]
             while True:
                 datos_recibidos = conexion.recv(2048).decode("utf-8") #Recibimos datos del cliente
                 if not datos_recibidos: break
@@ -92,24 +96,20 @@ class Servidor:
             print(f"[SALIDA] Cliente {id_jugador} desconectado")
             if conexion in self.clientes:
                 self.clientes.remove(conexion)
-            
-            # Si ya no queda nadie, enviamos a AWS
-            if not self.clientes and self.tiempo_inicio_sesion:
+            # Si ya no queda nadie, disparamos el envío a AWS
+            if not self.clientes and self.tiempo_inicio_sesion is not None:
                 self.finalizar_partida_aws()
-            if conexion in self.clientes:
-                self.clientes.remove(conexion)
+            
+            # Limpieza de datos de juego
             if id_jugador in self.jugadores_info:
                 del self.jugadores_info[id_jugador]
             
-            # Recuperamos la ID para que otro la pueda usar
             if id_jugador not in self.ids_disponibles:
                 self.ids_disponibles.append(id_jugador)
-                self.ids_disponibles.sort() # Ordenamos para que siempre se asigne la mas baja
+                self.ids_disponibles.sort()
             
-            # Avisamos a todos de que este jugador se fue (para borrar su muñeco)
             self.broadcast_estado(id_jugador, {"evento": "SALIDA", "id": id_jugador})
 
-            # Si se va el que tiene la bandera, la liberamos Y AVISAMOS
             if self.dueno_bandera == id_jugador:
                 self.dueno_bandera = None
                 self.broadcast_estado(id_jugador, {"evento": "RESET"})
@@ -171,12 +171,12 @@ class Servidor:
             max_p = max(lista_scores)
             id_ganador = ids[lista_scores.index(max_p)]
 
-        # 4. Estructura EXACTA para tu Spring Boot
+        ids_reales = [self.db_ids.get(pid) for pid in self.ids_jugadores_sesion if self.db_ids.get(pid)]
         datos_finales = {
             "duracion": duracion,
-            "id": id_ganador,
-            "jugadorIds": ids,
-            "scores": lista_scores  # Cambiado de 'puntajes' a 'scores'
+            "id": self.db_ids.get(id_ganador, 0), # ID real del ganador
+            "jugadorIds": ids_reales,             # Lista de IDs reales
+            "scores": lista_scores
         }
 
         # 5. Envío asíncrono usando Hilos para no congelar el servidor
