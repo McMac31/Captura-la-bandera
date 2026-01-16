@@ -10,7 +10,7 @@ from API.api_servicio import APIService
 
 # Clase principal del juego
 class Juego:
-    def __init__(self,nombre_jugador,email_jugador):
+    def __init__(self,nombre_jugador,email_jugador,id_db):
         # Inicializamos el juego
         pygame.init()
         self.pantalla = pygame.display.set_mode((ANCHO, ALTO))
