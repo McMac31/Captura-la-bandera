@@ -44,8 +44,7 @@ class Servidor:
         self.ids_jugadores_sesion.add(id_jugador)
         buffer = "" 
         try: #Control de excepciones
-            if "id_db" in data:
-                self.db_ids[id_jugador] = data["id_db"]
+           
             while True:
                 datos_recibidos = conexion.recv(2048).decode("utf-8") #Recibimos datos del cliente
                 if not datos_recibidos: break
