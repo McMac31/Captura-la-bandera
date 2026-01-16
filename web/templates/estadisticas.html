@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Estadísticas Globales - Captura la Bandera</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> <!-- Enlace al CSS -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='imgs/BanderaFavicon.png') }}"> <!-- Favicon -->
 </head>
 <body>
     <div class="container">
@@ -15,25 +16,26 @@
         <div class="status-grid">
             <div class="card">
                 <h3>Total Jugadores</h3>
-                <div class="puntos">{{ stats.totalJugadores }}</div>
+                <div class="puntos">{{ stats.totalJugadores }}</div> <!-- Mostrar total de jugadores -->
             </div>
 
             <div class="card">
                 <h3>Total Partidas</h3>
-                <div class="puntos">{{ stats.totalPartidas }}</div>
+                <div class="puntos">{{ stats.totalPartidas }}</div> <!-- Mostrar total de partidas -->
             </div>
         </div>
+
         <div class="bandera-box">
-    <h2>📈 Promedios de Juego</h2>
-    <div style="text-align: left; padding: 10px;">
-        <p><strong>Promedio Jugadores por Partida:</strong> {{ stats.promedioJugadoresPorPartida | round(2) }}</p>
-        <p><strong>Promedio Score por Partida:</strong> {{ stats.promedioScorePorPartida | round(2) }}</p>
-        <p><strong>Promedio Duración:</strong> {{ stats.promedioDuracionPorPartida | round(2) }}s</p>
-    </div>
-</div>
+            <h2>📈 Promedios de Juego</h2>
+            <div class="estadisticas"> <!-- Sección de estadísticas -->
+                <p><strong>Promedio Jugadores por Partida:</strong> {{ stats.promedioJugadoresPorPartida | round(2) }}</p>
+                <p><strong>Promedio Score por Partida:</strong> {{ stats.promedioScorePorPartida | round(2) }}</p>
+                <p><strong>Promedio Duración:</strong> {{ stats.promedioDuracionPorPartida | round(2) }}s</p>
+            </div>
+        </div>
 
         <nav>
-            <a href="/" class="btn">Volver</a>
+            <a href="/" class="btn">Volver</a> <!-- Botón para volver a la pag principal -->
         </nav>
     </div>
 </body>

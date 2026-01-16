@@ -21,8 +21,8 @@ body {
     border-bottom: 4px solid #e94560; 
 }
 
-/* Rejilla de Jugadores */
-.status-grid {
+/* Grid de Jugadores */
+.estado-grid {
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: repeat(1, 1fr);
     grid-column-gap: 0px;
@@ -32,7 +32,7 @@ body {
     margin-top: 30px; 
     
 }
-/**/
+/*Tarjeta de jugador*/
 .card { 
     background-color: #0f3460; 
     padding: 15px; 
@@ -44,7 +44,7 @@ body {
     transition: transform 0.3s;
     cursor: pointer;
 }
-
+/*Tarjeta de jugador local*/
 .local { 
     border: 2px solid #e94560; 
 }
@@ -73,13 +73,33 @@ body {
     color: white; 
     text-decoration: none; 
     border-radius: 5px; 
+    cursor: pointer;
 }
 
 .btn:hover {
     background-color: #ff2e4c;
     transition: background-color 0.3s;
+    cursor: pointer;
 }
 
+/* Contenedor de ranking */
+.Tarjeta-ranking {
+    margin-top: 20px;
+}
+
+/* Estilos para el enlace de eliminación */
+.btn-eliminar {
+    color: #e94560;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-eliminar:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+/*Tabla de ranking*/
 table {
     width: 100%;
     border-collapse: collapse;
@@ -100,4 +120,19 @@ td {
 
 tr:last-child td {
     border-bottom: none;
+}
+
+/* Seccion estadísticas */
+.estadisticas {
+    text-align: left;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.estadisticas p {
+    margin: 8px 0;
+}
+
+.menu-acciones {
+    margin-top: 20px;
 }

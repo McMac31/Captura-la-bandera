@@ -58,7 +58,6 @@ class Jugador:
             if bandera.portador == enemigo:
                 print(f"{self.NombreJugador} atrapó a {enemigo.NombreJugador}.")
                 bandera.reiniciar()
-                # AQUI ESTA EL CAMBIO: Reiniciamos a LOS DOS
                 self.reiniciar_posicion() # El cazador vuelve a casa
                 enemigo.reiniciar_posicion() # La victima vuelve a casa
                 return True # Hubo robo

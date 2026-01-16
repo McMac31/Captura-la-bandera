@@ -3,29 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <title>Ranking Global</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> <link rel="icon" type="image/png" href="{{ url_for('static', filename='imgs/BanderaFavicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='imgs/BanderaFavicon.png') }}">
 </head>
 <body>
-    <div class="container"> <div class="header"> <h1>🏆 RANKING GLOBAL</h1>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 RANKING GLOBAL</h1>
         </div>
 
-        <div class="card" style="margin-top: 20px;"> <table style="width: 100%; border-collapse: collapse;">
-                <tr>
-                    <th>Nombre</th>
-                    <th>Puntos</th>
-                    <th>Gestión</th>
-                </tr>
-                {% for j in ranking %}
-                <tr style="border-bottom: 1px solid #16213e;">
-                    <td>{{ j.nombre }}</td>
-                    <td class="puntos">{{ j.scoreTotal }}</td> <td>
-                        <a href="/eliminar/{{ j.id }}" onclick="return confirm('¿Borrar Jugador?')" style="color: #e94560;">[X]</a>
-                    </td>
-                </tr>
-                {% endfor %}
+        <div class="Tarjeta-ranking">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Puntos</th>
+                        <th>Gestión</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for j in ranking %} <!-- Iterar sobre el ranking de jugadores -->
+                    <tr>
+                        <td>{{ j.nombre }}</td> <!-- Mostrar nombre del jugador -->
+                        <td class="puntos">{{ j.scoreTotal }}</td> <!-- Mostrar puntos totales -->
+                        <td>
+                            <a href="/eliminar/{{ j.id }}" onclick="return confirm('¿Borrar Jugador?')" class="btn-eliminar">[X]</a> <!-- Enlace para eliminar jugador y pregunta de confirmación -->
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
 
-        <a href="/" class="btn">Volver</a> </div>
+        <a href="/" class="btn">Volver</a>
+    </div>
 </body>
 </html>

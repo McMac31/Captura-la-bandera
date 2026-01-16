@@ -1,5 +1,5 @@
 import threading
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, redirect, url_for
 import os
 from API.api_servicio import APIService
 
@@ -15,7 +15,7 @@ class ServerFlask(threading.Thread):
         # Esta función se ejecuta al hacer .start() desde el juego
         base_dir = os.path.dirname(__file__)
         template_dir = os.path.abspath(os.path.join(base_dir, 'templates'))
-        # --- NUEVO: Definimos la carpeta de archivos estaticos (CSS) ---
+        # Definimos la carpeta de archivos estaticos (CSS, JS, imágenes)
         static_dir = os.path.abspath(os.path.join(base_dir, 'static'))
         
         # Iniciamos Flask con las carpetas configuradas
@@ -60,27 +60,28 @@ class ServerFlask(threading.Thread):
         def ver_ranking():
             api = APIService()
             datos_ranking = api.get_ranking()
-            # Usamos el template ranking.html que ya tienes creado
+            # Usamos el template ranking.html 
             return render_template('ranking.html', ranking=datos_ranking)
 
         @app.route('/partidas')
         def ver_partidas():
             api = APIService()
             lista_partidas = api.get_partidas()
+            #Usamos el template partidas.html
             return render_template('partidas.html', partidas=lista_partidas)
 
         @app.route('/estadisticas')
         def ver_stats():
             api = APIService()
             datos_stats = api.get_estadisticas_globales()
+            # Usamos el template estadisticas.html
             return render_template('estadisticas.html', stats=datos_stats)
 
         @app.route('/eliminar/<id_jugador>') # Ruta flexible
         def borrar_jugador(id_jugador):
             api = APIService()
-            if api.eliminar_jugador(id_jugador):
-                from flask import redirect, url_for
-                return redirect(url_for('ver_ranking'))
+            if api.eliminar_jugador(id_jugador): # Si se elimina correctamente
+                return redirect(url_for('ver_ranking')) # Redirigimos a la vista del ranking
             return "Error", 500
 
         # Configuración del puerto dinámico basado en ID

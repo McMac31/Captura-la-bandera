@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Historial de Partidas - Captura la Bandera</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='imgs/BanderaFavicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> <!-- Enlace al CSS -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='imgs/BanderaFavicon.png') }}"> <!-- Favicon -->
 </head>
 <body>
     <div class="container">
@@ -23,19 +23,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for p in partidas %}
-                    <tr>
+                    {% for p in partidas %} <!-- Iterar sobre las partidas -->
+                    <tr> <!-- Fila por cada partida -->
                         <td>{{ p.id }}</td>
                         <td>{{ p.duracion }}s</td>
                         <td>{{ p.jugadorIds | join(', ') }}</td>
                         <td>{{ p.scores | join(' - ') }}</td>
                     </tr>
-                    {% endfor %}
+                    {% endfor %} 
                 </tbody>
             </table>
         </div>
         
-        <a href="/" class="btn">Volver al Monitor</a>
+        <a href="/" class="btn">Volver</a> <!-- Botón para volver a la pag principal -->
     </div>
 </body>
 </html>

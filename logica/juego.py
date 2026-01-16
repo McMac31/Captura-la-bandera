@@ -169,8 +169,7 @@ class Juego:
                 id_remoto = mensaje['id']
                 #Solo aceptamos datos de OTROS
                 if id_remoto != self.mi_id: 
-                    
-                    # --- NUEVO: SI EL JUGADOR NO EXISTE (ej: reingreso), LO RE-CREAMOS ---
+                    # Si el jugador no existe, lo creamos
                     if id_remoto not in self.jugadores:
                          # Mapa rapido de datos originales para reconstruir al jugador
                          datos_base = {
@@ -184,7 +183,7 @@ class Juego:
                              nuevo_j = Jugador(x_ini, y_ini, color_ini, id_remoto, f"Jugador {id_remoto}", "", False)
                              self.jugadores[id_remoto] = nuevo_j
 
-                    # Si ya existe (o lo acabamos de crear), actualizamos
+                    # Si ya existe o lo acabamos de crear actualizamos
                     if id_remoto in self.jugadores:
                         jugador_remoto = self.jugadores[id_remoto]
                         
@@ -201,7 +200,7 @@ class Juego:
 
         # Lista jugadores 
         lista_jugadores = list(self.jugadores.values())
-        # Actualizar Bandera (ya no calcula colisiones sola)
+        # Actualizar Bandera 
         self.bandera.actualizar()
 
         # Verificacion de robos
@@ -211,10 +210,10 @@ class Juego:
                 if self.bandera.portador != j1:
                     for j2 in lista_jugadores:
                         if j1 != j2:
-                            # Si robo a alguien, aviso de un RESET
+                            # Si robo a alguien RESETEO
                             if j1.robar(j2, self.bandera):
                                 self.red.enviar({'id': self.mi_id, 'evento': 'RESET'})
-                                self.resetear_ronda() # Me reseteo yo tambien visualmente al instante
+                                self.resetear_ronda() # Me reseteo
 
                 # Controlamos el suicidio con la bandera
                 else: 
@@ -232,7 +231,7 @@ class Juego:
     def verificar_puntos(self):
         portador = self.bandera.portador
         
-        # Solo verificamos si nosotros llevamos la bandera (Autoridad)
+        # Solo verificamos si nosotros llevamos la bandera 
         if portador and portador.es_local:
             anoto_punto = False
             
@@ -267,8 +266,6 @@ class Juego:
                 hilo = threading.Thread(target=tarea_api, daemon=True)
                 hilo.start()
                     
-            
-
     # Funcion para resetear la ronda
     def resetear_ronda(self):
         self.bandera.reiniciar()
@@ -277,7 +274,7 @@ class Juego:
             if hasattr(jugador, 'reiniciar_posicion'): # Si el metodo existe
                 jugador.reiniciar_posicion()
             else:
-                 # Backup por si no existe el metodo en jugador
+                 # Si no existe el metodo se hace a mano
                 jugador.rect.x = jugador.inicio_x
                 jugador.rect.y = jugador.inicio_y
 

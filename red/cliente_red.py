@@ -19,15 +19,15 @@ class ClienteRed:
             self.cliente.connect(DIRECCION_SERVIDOR)
             buffer_temp = ""
             while "\n" not in buffer_temp:
-                # Aumentamos un poco el buffer por si el mapa es grande
-                datos_recibidos = self.cliente.recv(4096).decode("utf-8")
+                # Le damos tiempo a que llegue el mensaje completo
+                datos_recibidos = self.cliente.recv(4096).decode("utf-8") # Recibimos datos
                 if not datos_recibidos: raise Exception("Servidor cerró")
                 buffer_temp += datos_recibidos
             
-            msg_raw, resto = buffer_temp.split("\n", 1)
+            msg_raw, resto = buffer_temp.split("\n", 1) # Separamos el primer mensaje
             self.buffer = resto # Guardamos lo que sobre para luego
             
-            data = json.loads(msg_raw)
+            data = json.loads(msg_raw) # Decodificamos el mensaje de bienvenida
             
             if data["tipo"] == "BIENVENIDA":
                 self.id = data["id"]
@@ -39,9 +39,9 @@ class ClienteRed:
                     self.mapa_recibido = data["mapa"]
                     print(f"[RED] Mapa recibido con {len(self.mapa_recibido)} muros")
                 
-                thread = threading.Thread(target=self.escuchar_servidor)
-                thread.daemon = True 
-                thread.start()
+                thread = threading.Thread(target=self.escuchar_servidor) #Hilo de escucha
+                thread.daemon = True # El hilo muere al cerrar el programa
+                thread.start()# Iniciamos el hilo
                 return True
             #Control de excepciones
         except Exception as e:
@@ -60,7 +60,7 @@ class ClienteRed:
             print(f"[RED] Error al iniciar hilo de escucha: {e}")
             return False
         
-
+    #Función que escucha mensajes del servidor
     def escuchar_servidor(self):
         #Hilo que escucha mensajes del servidor.
         while self.conectado:
@@ -79,8 +79,8 @@ class ClienteRed:
                     mensaje_completo, self.buffer = self.buffer.split("\n", 1)
                     if mensaje_completo.strip(): # Ignoramos líneas vacías
                         try:
-                            data = json.loads(mensaje_completo)
-                            self.cola_mensajes.append(data)
+                            data = json.loads(mensaje_completo) # Decodificamos el mensaje
+                            self.cola_mensajes.append(data) # Lo añadimos a la cola de mensajes
                         except json.JSONDecodeError:
                             print(f"[RED] Error JSON: {mensaje_completo}")
 
