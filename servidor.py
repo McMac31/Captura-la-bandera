@@ -56,10 +56,13 @@ class Servidor:
                     if not mensaje.strip(): continue
                     
                     try:
-                        data = json.loads(mensaje) #Decodificamos el JSON recibido
+                        data = json.loads(mensaje)
+                        #Envio  de ID de base de datos 
+                        if "id_db" in data:
+                            self.db_ids[id_jugador] = data["id_db"]
+                        # Envio de puntos
                         if "puntos" in data:
                             self.historial_puntos[id_jugador] = data["puntos"]
-                        
                         # Si es un evento especial
                         if "evento" in data:
                             # Si alguien pide la bandera
@@ -157,26 +160,21 @@ class Servidor:
                 conexion.close()
     
     def finalizar_partida_aws(self):
-        # 1. Calculamos duración final
         duracion = int(time.time() - self.tiempo_inicio_sesion)
         
-        # 2. Preparamos las listas de IDs y Scores
-        ids = list(self.ids_jugadores_sesion)
-        # Obtenemos los puntos guardados o 0 si el jugador no anotó nunca
-        lista_scores = [self.historial_puntos.get(pid, 0) for pid in ids]
-        
-        # 3. Determinamos el ganador (el ID con más puntos)
-        id_ganador = ids[0] if ids else 0
-        if lista_scores:
-            max_p = max(lista_scores)
-            id_ganador = ids[lista_scores.index(max_p)]
-
+        # Obtenemos los IDs reales de la base de datos usando nuestro mapa
         ids_reales = [self.db_ids.get(pid) for pid in self.ids_jugadores_sesion if self.db_ids.get(pid)]
+        scores = [self.historial_puntos.get(pid, 0) for pid in self.ids_jugadores_sesion]
+        
+        # Determinar el ganador con el ID de la base de datos
+        id_ganador_socket = max(self.historial_puntos, key=self.historial_puntos.get) if self.historial_puntos else 0
+        id_ganador_db = self.db_ids.get(id_ganador_socket, 0)
+
         datos_finales = {
             "duracion": duracion,
-            "id": self.db_ids.get(id_ganador, 0), # ID real del ganador
-            "jugadorIds": ids_reales,             # Lista de IDs reales
-            "scores": lista_scores
+            "id": id_ganador_db, 
+            "jugadorIds": ids_reales,
+            "scores": scores
         }
 
         # 5. Envío asíncrono usando Hilos para no congelar el servidor

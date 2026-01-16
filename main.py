@@ -22,11 +22,13 @@ if __name__ == "__main__":
         except EmailNotValidError:
             print("Email inválido ingrese un formato correcto.")
 
+    # Registramos una sola vez y obtenemos el ID real de la base de datos
     id_db = api.registrar_jugador(nombre_jugador, email_jugador)
-    if id_db: # Si recibimos un ID válido 
-        # Pasamos los datos al juego
-        CapturaBandera = Juego(nombre_jugador, email_jugador, id_db) 
-        # olo corremos el juego si el objeto se creó correctamente
+    if id_db:      
+        # Enviar parametros de partida
+        CapturaBandera = Juego(nombre_jugador, email_jugador, id_db)
+        
+        #Arrancar el juego SOLO si se registró correctamente
         CapturaBandera.correr()
     else:
-        print("Error: No se pudo registrar al jugador en AWS. Verifica tu conexión.")
+        print("No se pudo conectar con AWS para registrar al jugador.")

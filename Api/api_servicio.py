@@ -10,8 +10,8 @@ class APIService:
         try:
             r = requests.post(f"{self.url_base}/jugadores", json={"nombre": nombre, "email": email}, timeout=5)
             if r.status_code in (200, 201):
-                datos = r.json() # Convertimos la respuesta en un diccionario
-                return datos.get("id") # Devolvemos el ID real de la base de datos
+                # RETORNAR EL ID REAL QUE DA EL BACKEND
+                return r.json().get("id") 
             return None
         except requests.exceptions.RequestException as e:
             print(f"Error de conexión con AWS: {e}")
