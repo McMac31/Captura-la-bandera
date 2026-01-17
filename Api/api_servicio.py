@@ -7,12 +7,15 @@ class APIService:
         self.url_base = "http://35.171.209.196:8080/api"
 
     def registrar_jugador(self, nombre, email):
-        try: #La URL del endpoint de registro de jugador
+        try:
             r = requests.post(f"{self.url_base}/jugadores", json={"nombre": nombre, "email": email}, timeout=5)
-            return r.status_code in (200, 201)
+            if r.status_code in (200, 201):
+                # RETORNAR EL ID REAL QUE DA EL BACKEND
+                return r.json().get("id") 
+            return None
         except requests.exceptions.RequestException as e:
             print(f"Error de conexión con AWS: {e}")
-            return False
+            return None
 
     def get_ranking(self):
         try:
