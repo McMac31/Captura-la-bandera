@@ -1,7 +1,7 @@
 import threading
 from flask import Flask, jsonify, render_template, redirect, url_for
 import os
-from API.api_servicio import APIService
+from Api.api_servicio import APIService
 
 class ServerFlask(threading.Thread):
     def __init__(self, juego_instancia):

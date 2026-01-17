@@ -6,7 +6,7 @@ from entidades.jugador import Jugador
 from entidades.bandera import Bandera
 from red.cliente_red import ClienteRed
 from web.servidor_web import ServerFlask
-from API.api_servicio import APIService
+from Api.api_servicio import APIService
 
 # Clase principal del juego
 class Juego:

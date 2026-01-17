@@ -1,6 +1,6 @@
 from logica.juego import Juego
 from email_validator import validate_email, EmailNotValidError
-from API.api_servicio import APIService
+from Api.api_servicio import APIService
 # Punto de entrada del juego
 if __name__ == "__main__":
     api=APIService()
