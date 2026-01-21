@@ -20,7 +20,6 @@
                         <th>Scores</th>
                     </tr>
                 </thead>
-<<<<<<< HEAD
                <tbody>
                 {% for p in partidas %} <tr> <td>{{ p.id }}</td>
                     <td>{{ p.duracion }}s</td>
@@ -29,16 +28,6 @@
                 </tr>
                 {% endfor %} 
             </tbody>
-=======
-                <tbody>
-                    {% for p in partidas %} <tr> <td>{{ p.id }}</td>
-                        <td>{{ p.duracion }}s</td>
-                        <td>{{ p.nombres_jugadores | join(', ') }}</td>
-                        <td>{{ p.scores | join(' - ') }}</td>
-                    </tr>
-                    {% endfor %} 
-                </tbody>
->>>>>>> desarrollo
             </table>
         </div>
         

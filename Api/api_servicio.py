@@ -8,9 +8,15 @@ class APIService:
 
     def registrar_jugador(self, nombre, email):
         try:
+            # Buscamos si el correo ya existe para evitar duplicados y sumar puntos a la cuenta existente
+            jugadores_existentes = self.get_jugadores()
+            for j in jugadores_existentes:
+                if j.get('email') == email:
+                    # Si el correo coincide, devolvemos su ID actual para reutilizar la cuenta
+                    return j.get('id')
             r = requests.post(f"{self.url_base}/jugadores", json={"nombre": nombre, "email": email}, timeout=10)
             if r.status_code in (200, 201):
-                # RETORNAR EL ID REAL QUE DA EL BACKEND
+                # Retorna el id de la BBDD
                 return r.json().get("id") 
             return None
         except requests.exceptions.RequestException as e:
