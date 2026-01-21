@@ -15,6 +15,7 @@
         </div>
 
         <div class="estado-grid">
+<<<<<<< HEAD
             {% for id, info in servidor.jugadores_info.items() %}
             <div class="card" id="card-{{ id }}">
                 <h3>{{ info.nombre if info.nombre else 'Jugador ' ~ id }}</h3>
@@ -23,7 +24,17 @@
                 <p>Posición: <span id="pos-{{ id }}">{{ info.posicion.x }}, {{ info.posicion.y }}</span></p>
             </div>
             {% endfor %}
+=======
+        {% for id_jugador, info in servidor.jugadores_info.items() %}
+        <div class="card" id="card-{{ id_jugador }}">
+            <h3 id="nombre-{{ id_jugador }}">{{ info.nombre if info.nombre else 'Jugador ' ~ id_jugador }}</h3>
+            <p>ID: {{ id_jugador }}</p>
+            <div class="puntos" id="puntos-{{ id_jugador }}">{{ servidor.historial_puntos.get(id_jugador, 0) }}</div>
+            <p>Posición: <span id="pos-{{ id_jugador }}">{{ info.posicion.x if info.posicion else 0 }}, {{ info.posicion.y if info.posicion else 0 }}</span></p>
+>>>>>>> desarrollo
         </div>
+        {% endfor %}
+    </div>
 
         <div class="bandera-box">
         <h2>🟩 ESTADO DE LA BANDERA 🟩</h2>

@@ -22,16 +22,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for j in ranking %} <!-- Iterar sobre el ranking de jugadores -->
-                    <tr>
-                        <td>{{ j.nombre }}</td> <!-- Mostrar nombre del jugador -->
-                        <td class="puntos">{{ j.scoreTotal }}</td> <!-- Mostrar puntos totales -->
-                        <td>
-                            <a href="/eliminar/{{ j.id }}" onclick="return confirm('¿Borrar Jugador?')" class="btn-eliminar">[X]</a> <!-- Enlace para eliminar jugador y pregunta de confirmación -->
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+            {% for j in ranking %}
+            <tr>
+                <td>{{ j.nombre }}</td>
+                <td class="puntos">{{ j.scoreTotal }}</td>
+                <td>
+                    <a href="{{ url_for('borrar_jugador', id_jugador=j.jugadorId) }}" 
+                    onclick="return confirm('¿Estás seguro de borrar a {{ j.nombre }}?')" 
+                    class="btn-eliminar">[X]</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+                
             </table>
         </div>
 

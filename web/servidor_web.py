@@ -87,12 +87,12 @@ class ServerFlask(threading.Thread):
             # Usamos el template estadisticas.html
             return render_template('estadisticas.html', stats=datos_stats)
 
-        @app.route('/eliminar/<id_jugador>') # Ruta flexible
+        @app.route('/eliminar/<int:id_jugador>')
         def borrar_jugador(id_jugador):
             api = APIService()
-            if api.eliminar_jugador(id_jugador): # Si se elimina correctamente
-                return redirect(url_for('ver_ranking')) # Redirigimos a la vista del ranking
-            return "Error", 500
+            if api.eliminar_jugador(id_jugador): #
+                return redirect(url_for('ver_ranking'))
+            return f"Error al eliminar al jugador {id_jugador}", 500
 
         # El servidor central siempre corre en el puerto 5000
         print(f" Servidor iniciado en http://localhost:5000")
