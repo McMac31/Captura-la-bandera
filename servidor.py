@@ -165,8 +165,13 @@ class Servidor:
         duracion = int(time.time() - self.tiempo_inicio_sesion)
         
         # Obtenemos los IDs reales de la base de datos usando nuestro mapa
-        ids_reales = [self.db_ids.get(pid) for pid in self.ids_jugadores_sesion if self.db_ids.get(pid)]
-        scores = [self.historial_puntos.get(pid, 0) for pid in self.ids_jugadores_sesion]
+        ids_reales = []
+        scores = []
+        # Un solo bucle para que ambas listas tengan siempre el mismo tamaño
+        for pid in self.ids_jugadores_sesion:
+            if pid in self.db_ids:
+                ids_reales.append(self.db_ids[pid])
+                scores.append(self.historial_puntos.get(pid, 0))
         
         # Determinar el ganador con el ID de la base de datos
         id_ganador_socket = max(self.historial_puntos, key=self.historial_puntos.get) if self.historial_puntos else 0
@@ -179,7 +184,7 @@ class Servidor:
             "scores": scores
         }
 
-        # 5. Envío asíncrono usando Hilos para no congelar el servidor
+        # Envío asíncrono usando Hilos para no congelar el servidor
         def envio_hilo():
             try:
                 print(f"[AWS] Intentando guardar partida de {duracion}s...")

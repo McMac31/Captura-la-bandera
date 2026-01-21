@@ -94,16 +94,16 @@ class Juego:
             if evento.type == pygame.QUIT:
                 self.ejecutando = False
 
-   # Actualizamos el estado del juego
+# Actualizamos el estado del juego
     def actualizar(self):
         tiempo_actual = pygame.time.get_ticks()
 
         #Control de red y movimiento local
         if self.mi_id in self.jugadores:
-            jugador_local= self.jugadores[self.mi_id]
+            jugador_local = self.jugadores[self.mi_id]
 
             #Guardado de posicion anterior
-            pos_anterior=(jugador_local.rect.x, jugador_local.rect.y)
+            pos_anterior = (jugador_local.rect.x, jugador_local.rect.y)
             puntos_anteriores = jugador_local.puntos
             
             jugador_local.mover(self.obstaculos) #Movimiento local
@@ -114,14 +114,16 @@ class Juego:
 
             # Control de LAG: Solo enviamos cada 50s
             if tiempo_actual - self.ultimo_envio > self.intervalo_envio:
-                if (jugador_local.rect.x, jugador_local.rect.y) != pos_anterior or jugador_local.puntos != puntos_anteriores: #Si hubo cambio de posicion o puntos
-                    datos={ #Datos a enviar
+                # Añadimos self.ultimo_envio == 0 para que el servidor reciba los datos de ID y nombre nada más conectar
+                if self.ultimo_envio == 0 or (jugador_local.rect.x, jugador_local.rect.y) != pos_anterior or jugador_local.puntos != puntos_anteriores: #Si hubo cambio de posicion o puntos
+                    datos = { #Datos a enviar
                         'id': self.mi_id,
-                        'posicion':{"x": jugador_local.rect.x, "y": jugador_local.rect.y},
+                        'posicion': {"x": jugador_local.rect.x, "y": jugador_local.rect.y},
                         'id_db': self.id_db,
                         'puntos': jugador_local.puntos,
                         'nombre': jugador_local.NombreJugador,
-                        'email': jugador_local.EmailJugador}
+                        'email': jugador_local.EmailJugador
+                    }
                     self.red.enviar(datos) #Envio de nueva posicion al servidor
                     self.ultimo_envio = tiempo_actual
                 
