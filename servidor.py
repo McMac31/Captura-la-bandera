@@ -4,6 +4,7 @@ import json
 import time
 import requests
 from config import *
+from web.servidor_web import ServerFlask
 
 #Clase Servidor de Red
 class Servidor:
@@ -11,6 +12,8 @@ class Servidor:
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #Con AF_INET usamos IPv4, con SOCK_STREAM usamos TCP
         self.server.bind(DIRECCION_SERVIDOR) #Enlazamos el socket a la direccion y puerto
         self.server.listen() #Ponemos el servidor en modo escucha
+        self.servidor_web = ServerFlask(self)
+        self.servidor_web.start()
         
         print(f"[ARRANCANDO] Servidor escuchando en {SERVIDOR_IP}:{PUERTO}") #Validamos que el servidor esta corriendo
 
@@ -81,7 +84,7 @@ class Servidor:
 
                         # Si es movimiento normal, retransmitimos
                         elif "posicion" in data:
-                            self.jugadores_info[id_jugador] = data["posicion"]
+                            self.jugadores_info[id_jugador] = data 
                             self.broadcast_estado(id_jugador, data)
                             
                     except json.JSONDecodeError:

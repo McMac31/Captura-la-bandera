@@ -2,48 +2,49 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Estadisticas Partida - Jugador {{ juego.mi_id }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> <!-- Enlace al CSS -->
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='imgs/BanderaFavicon.png') }}"> <!-- Favicon -->
+    <title>Monitor del Servidor - Captura la Bandera</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='imgs/BanderaFavicon.png') }}">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎮 CAPTURA LA BANDERA</h1>
-            <p>Jugador: - <strong>ID: {{ juego.mi_id }} ({{ juego.nombrelocal }})</strong></p> <!-- Mostrar ID y nombre del jugador local -->
+            <h1>🎮 CAPTURA LA BANDERA!</h1>
+            <p>Estado en tiempo real de la partida</p>
         </div>
 
         <div class="estado-grid">
-            {% for id, j in juego.jugadores.items() %} <!-- Iterar sobre los jugadores -->
-            <div class="card {{ 'local' if j.es_local else '' }}"> <!-- Resaltar el jugador local -->
-                <h3>{{ j.NombreJugador }}</h3>
-                <p>ID: {{ j.id }}</p>
-                <div class="puntos" id="puntos-{{ j.id }}">{{ j.puntos }}</div>
-                <p>Posición: <span id="pos-{{ j.id }}">{{ j.rect.x }}, {{ j.rect.y }}</span></p>
-            </div>
-            {% endfor %} <!-- Fin de la iteración sobre los jugadores -->
+        {% for id_jugador, info in servidor.jugadores_info.items() %}
+        <div class="card" id="card-{{ id_jugador }}">
+            <h3 id="nombre-{{ id_jugador }}">{{ info.nombre if info.nombre else 'Jugador ' ~ id_jugador }}</h3>
+            <p>ID: {{ id_jugador }}</p>
+            <div class="puntos" id="puntos-{{ id_jugador }}">{{ servidor.historial_puntos.get(id_jugador, 0) }}</div>
+            <p>Posición: <span id="pos-{{ id_jugador }}">{{ info.posicion.x if info.posicion else 0 }}, {{ info.posicion.y if info.posicion else 0 }}</span></p>
         </div>
+        {% endfor %}
+    </div>
 
         <div class="bandera-box">
-            <h2>🟩 ESTADO DE LA BANDERA 🟩</h2>
-            <p id="bandera-info">
-                {% if juego.bandera.portador %} <!-- Verificar si la bandera tiene portador -->
-                    La tiene: <strong>{{ juego.bandera.portador.NombreJugador }}</strong>
-                {% else %} <!-- Si no tiene portador -->
-                    Estado: <strong>LIBRE EN EL CENTRO</strong> 
-                {% endif %} 
-            </p>
-            <p>Ubicación: (<span id="bandera-pos">{{ juego.bandera.rect.x }}, {{ juego.bandera.rect.y }}</span>)</p> <!-- Ubicación física de la bandera -->
+        <h2>🟩 ESTADO DE LA BANDERA 🟩</h2>
+        <p id="bandera-info">
+            {% if servidor.dueno_bandera %}
+                {% set info_portador = servidor.jugadores_info.get(servidor.dueno_bandera) %}
+                La tiene: <strong>{{ info_portador.nombre if info_portador and info_portador.nombre else 'Jugador ' ~ servidor.dueno_bandera }}</strong>
+            {% else %}
+                Estado: <strong>LIBRE EN EL CENTRO</strong>
+            {% endif %}
+        </p>
+        <p>Ubicación: (<span id="bandera-pos">400, 300</span>)</p>
         </div>
 
-        <div class="menu-acciones"> <!-- Menú de navegación -->
+        <div class="menu-acciones">
             <a href="/api/estado" class="btn">Ver JSON Crudo</a>
             <a href="/ranking" class="btn">Ver Ranking</a>
             <a href="/partidas" class="btn">Historial Partidas</a>
             <a href="/estadisticas" class="btn">Estadísticas Globales</a>
         </div>
     </div>
-
-    <script src="{{ url_for('static', filename='script/refrescar.js') }}" defer></script> <!-- Enlace al JS de refresco -->
+    <script src="{{ url_for('static', filename='script/refrescar.js') }}" defer></script>
 </body>
 </html>

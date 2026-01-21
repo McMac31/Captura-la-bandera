@@ -1,42 +1,67 @@
+
+let historialPuntos = {}; 
+
 function refrescarPantalla() {
-    fetch('/api/estado') // Consulta la ruta JSON del servidor web
+    fetch('/api/estado') 
         .then(response => response.json())
         .then(data => {
-            // Por cada jugador en la respuesta
-            data.jugadores.forEach(jugador => {
-                // Actualizar Puntos
-                const ptsJugador = document.getElementById(`puntos-${jugador.id}`); //Variable puntos del jugador
-                if (ptsJugador) {
-                    ptsJugador.innerText = jugador.puntos;
-                }
+            const grid = document.querySelector('.estado-grid');
 
-                // Actualizar Posición del Jugador
-                const posJugador = document.getElementById(`pos-${jugador.id}`);
-                if (posJugador) {
-                    posJugador.innerText = `${jugador.posicion.x}, ${jugador.posicion.y}`;
+            data.jugadores.forEach(jugador => {
+                // Confeti si suben los puntos
+                if (historialPuntos[jugador.id] !== undefined && jugador.puntos > historialPuntos[jugador.id]) {
+                    lanzarConfeti();
+                }
+                historialPuntos[jugador.id] = jugador.puntos;
+
+                // Buscar tarjeta del jugador por ID
+                let card = document.getElementById(`card-${jugador.id}`);
+
+                if (!card) {
+                    // Si no existe: Crea tarjeta con diseño completo
+                    card = document.createElement('div');
+                    card.id = `card-${jugador.id}`;
+                    card.classList.add('card'); // Asegura que use el CSS .card
+                    card.innerHTML = `
+                        <h3 id="nombre-${jugador.id}">${jugador.nombre}</h3>
+                        <p>ID: ${jugador.id}</p>
+                        <div class="puntos" id="puntos-${jugador.id}">${jugador.puntos}</div>
+                        <p>Posición: <span id="pos-${jugador.id}">${jugador.posicion.x}, ${jugador.posicion.y}</span></p>
+                    `;
+                    grid.appendChild(card);
+                } else {
+                    // Si existe: Actualiza todo
+                    const nombreElem = document.getElementById(`nombre-${jugador.id}`);
+                    const puntosElem = document.getElementById(`puntos-${jugador.id}`);
+                    const posElem = document.getElementById(`pos-${jugador.id}`);
+
+                    if (nombreElem) nombreElem.innerText = jugador.nombre; 
+                    if (puntosElem) puntosElem.innerText = jugador.puntos;
+                    if (posElem) posElem.innerText = `${jugador.posicion.x}, ${jugador.posicion.y}`;
                 }
             });
 
-            // Actualizar estado de la bandera
+            // Actualizar Bandera (Nombre dinámico)
             const banderaInfo = document.getElementById('bandera-info');
             if (data.bandera.portador_id) {
-                // Buscamos el nombre del portador en la lista de jugadores recibida
-                const portador = data.jugadores.find(j => j.id === data.bandera.portador_id); // Funcion lambda para encontrar el portador
-                const nombre = portador ? portador.nombre : `ID ${data.bandera.portador_id}`; // Si no se encuentra, mostrar ID
+                const portador = data.jugadores.find(j => j.id === data.bandera.portador_id);
+                const nombre = portador ? portador.nombre : `ID ${data.bandera.portador_id}`;
                 banderaInfo.innerHTML = `La tiene: <strong>${nombre}</strong>`;
             } else {
                 banderaInfo.innerHTML = `Estado: <strong>LIBRE EN EL CENTRO</strong>`;
-            }
-
-            // Actualizar ubicación física de la bandera
-            const banderaPos = document.getElementById('bandera-pos');
-            if (banderaPos) {
-                banderaPos.innerText = `${data.bandera.posicion.x}, ${data.bandera.posicion.y}`;
             }
         })
         .catch(error => console.error('Error en AJAX:', error));
 }
 
+// Funcion de particulas
+function lanzarConfeti() {
+    confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#e94560', '#00ff41', '#ffffff']
+    });
+}
 
-// Ejecutar la actualización cada 500ms
 setInterval(refrescarPantalla, 500);

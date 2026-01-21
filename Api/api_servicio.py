@@ -8,7 +8,7 @@ class APIService:
 
     def registrar_jugador(self, nombre, email):
         try:
-            r = requests.post(f"{self.url_base}/jugadores", json={"nombre": nombre, "email": email}, timeout=5)
+            r = requests.post(f"{self.url_base}/jugadores", json={"nombre": nombre, "email": email}, timeout=10)
             if r.status_code in (200, 201):
                 # RETORNAR EL ID REAL QUE DA EL BACKEND
                 return r.json().get("id") 
