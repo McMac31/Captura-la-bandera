@@ -7,6 +7,7 @@ from entidades.bandera import Bandera
 from red.cliente_red import ClienteRed
 from API.api_servicio import APIService
 
+
 # Clase principal del juego
 class Juego:
     def __init__(self,nombre_jugador,email_jugador,id_db):
