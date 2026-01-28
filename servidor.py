@@ -2,9 +2,9 @@ import socket
 import threading
 import json
 import time
-import requests
 from config import *
 from web.servidor_web import ServerFlask
+from API.api_servicio import APIService
 
 #Clase Servidor de Red
 class Servidor:
@@ -187,14 +187,12 @@ class Servidor:
         # Envío asíncrono usando Hilos para no congelar el servidor
         def envio_hilo():
             try:
-                print(f"[AWS] Intentando guardar partida de {duracion}s...")
-                r = requests.post("http://35.171.209.196:8080/api/partidas", json=datos_finales, timeout=10)
-                if r.status_code in (200, 201):
-                    print("[AWS] ¡Éxito! Partida guardada correctamente.")
-                else:
-                    print(f"[AWS] Error del servidor: {r.status_code} - {r.text}")
+                print(f"[SYNC] Enviando resultados a Spring Boot y Odoo...")
+                api = APIService()
+                # Se encarga de enviarlo a ambos sitios
+                api.guardar_partida(datos_finales)
             except Exception as e:
-                print(f"[AWS] Fallo crítico de conexión: {e}")
+                print(f"[SYNC] Fallo crítico de conexión: {e}")
 
         # Lanzamos el hilo
         threading.Thread(target=envio_hilo, daemon=True).start()

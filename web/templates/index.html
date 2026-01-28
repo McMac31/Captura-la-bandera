@@ -18,7 +18,7 @@
         {% for id_jugador, info in servidor.jugadores_info.items() %}
         <div class="card" id="card-{{ id_jugador }}">
             <h3 id="nombre-{{ id_jugador }}">{{ info.nombre if info.nombre else 'Jugador ' ~ id_jugador }}</h3>
-            <p>ID: {{ id_jugador }}</p>
+            <p>Jugador #{{ id_jugador }}</p>
             <div class="puntos" id="puntos-{{ id_jugador }}">{{ servidor.historial_puntos.get(id_jugador, 0) }}</div>
             <p>Posición: <span id="pos-{{ id_jugador }}">{{ info.posicion.x if info.posicion else 0 }}, {{ info.posicion.y if info.posicion else 0 }}</span></p>
         </div>
