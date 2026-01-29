@@ -82,8 +82,9 @@ class APIService:
         try:
             # Bajamos el timeout para que el hilo no se quede colgado eternamente
             requests.post(f"{self.url_base}/partidas", json=datos_partida, timeout=2)
-        except requests.exceptions.RequestException as e:  #Control de excepciones
+        except requests.exceptions.RequestException as e:
             print(f"Error de conexión con AWS: {e}")
+
         
         # Envío a Odoo 
         # Se hace fuera del try/except de AWS para que se intente enviar aunque AWS falle

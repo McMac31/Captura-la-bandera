@@ -187,17 +187,21 @@ class Servidor:
             "scores": scores
         }
 
+        # Guardamos el ID de Odoo antes de resetear para el hilo
+        id_odoo_seguro = self.odoo_partida_id
+
         # Envío asíncrono usando Hilos para no congelar el servidor
-        def envio_hilo():
+        def envio_hilo(id_partida, datos):
             try:
                 print(f"[SYNC] Enviando resultados a Spring Boot y Odoo...")
-                self.api.finalizar_partida(datos_finales, self.odoo_partida_id)
+                # Usamos el ID seguro pasado por argumento
+                self.api.finalizar_partida(datos, id_partida)
             except Exception as e:
                 print(f"[Error Sync] {e}")
                
 
         # Lanzamos el hilo
-        threading.Thread(target=envio_hilo, daemon=True).start()
+        threading.Thread(target=envio_hilo, args=(id_odoo_seguro, datos_finales), daemon=True).start()
         
         # Reset para la siguiente sesión
         self.tiempo_inicio_sesion = None
