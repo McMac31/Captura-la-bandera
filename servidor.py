@@ -14,6 +14,8 @@ class Servidor:
         self.server.listen() #Ponemos el servidor en modo escucha
         self.servidor_web = ServerFlask(self)
         self.servidor_web.start()
+        self.api = APIService()
+        self.odoo_partida_id = None
         
         print(f"[ARRANCANDO] Servidor escuchando en {SERVIDOR_IP}:{PUERTO}") #Validamos que el servidor esta corriendo
 
@@ -42,6 +44,7 @@ class Servidor:
             self.tiempo_inicio_sesion = time.time()
             self.historial_puntos = {}
             self.ids_jugadores_sesion = set()
+            self.odoo_partida_id = self.api.iniciar_partida_odoo()
             print("[SESIÓN] Cronómetro de partida iniciado.")
         
         self.ids_jugadores_sesion.add(id_jugador)
@@ -188,17 +191,20 @@ class Servidor:
         def envio_hilo():
             try:
                 print(f"[SYNC] Enviando resultados a Spring Boot y Odoo...")
-                api = APIService()
-                # Se encarga de enviarlo a ambos sitios
-                api.guardar_partida(datos_finales)
+                self.api.finalizar_partida(datos_finales, self.odoo_partida_id)
             except Exception as e:
-                print(f"[SYNC] Fallo crítico de conexión: {e}")
+                print(f"[Error Sync] {e}")
+               
 
         # Lanzamos el hilo
         threading.Thread(target=envio_hilo, daemon=True).start()
         
         # Reset para la siguiente sesión
         self.tiempo_inicio_sesion = None
+        self.ids_jugadores_sesion = []
+        self.historial_puntos = {}
+        self.odoo_partida_id = None
+        
 
 if __name__ == "__main__":
     s = Servidor()

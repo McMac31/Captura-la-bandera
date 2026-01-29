@@ -31,7 +31,7 @@ class APIService:
             # SINCRONIZACIÓN CON ODOO 
             # Si tenemos un ID válido encontrado o creado, avisamos a Odoo
             if id_retorno:
-                self.odoo.registrar_jugador(nombre, email)
+                self.odoo.registrar_jugador(nombre, email,id_retorno)
                 return id_retorno
             
             return None
@@ -39,6 +39,18 @@ class APIService:
         except requests.exceptions.RequestException as e:  #Control de excepciones
             print(f"Error de conexión con AWS: {e}")
             return None
+        
+    def iniciar_partida_odoo(self):
+        #Funcion para poner el estado 'En Curso'
+        return self.odoo.iniciar_partida()
+    
+    def finalizar_partida(self, datos_partida, odoo_id_partida):
+        #Guarda en AWS y cierra la partida en Odoo 
+        # Guardar en AWS (Ranking global)
+        self.spring.guardar_partida(datos_partida)
+        # Cerrar en Odoo (Historial y puntos)
+        if odoo_id_partida:
+            self.odoo.finalizar_partida(odoo_id_partida, datos_partida)
 
     def get_ranking(self):
         try:
