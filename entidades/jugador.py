@@ -65,5 +65,38 @@ class Jugador:
 
     #Funcion para dibujar el jugador
     def dibujar(self, pantalla):
-        pygame.draw.rect(pantalla, self.color, self.rect)
-        pygame.draw.rect(pantalla, NEGRO, self.rect, 2)
+       # Color metálico oscuro para extremidades y detalles
+        color_metal = (max(40, self.color[0]-60), max(40, self.color[1]-60), max(40, self.color[2]-60))
+        # Color del visor brillante 
+        if self.color != AMARILLO:
+            color_visor = (100, 240, 255)
+        else: #Si el jugador es amarillo cambia el color
+            color_visor=(255, 50, 50) 
+        # Definimos áreas relativas al tamaño del jugador (self.rect)
+        cuerpo_ancho = self.rect.width - 4
+        cuerpo_alto = self.rect.height - 10
+        cuerpo_x = self.rect.centerx - cuerpo_ancho // 2
+        cuerpo_y = self.rect.bottom - cuerpo_alto - 4
+        # PIES
+        pie_radio = 5
+        pygame.draw.circle(pantalla, color_metal, (self.rect.left + 10, self.rect.bottom - 4), pie_radio)
+        pygame.draw.circle(pantalla, color_metal, (self.rect.right - 10, self.rect.bottom - 4), pie_radio)
+        # CUERPO PRINCIPAL
+        cuerpo_rect = pygame.Rect(cuerpo_x, cuerpo_y, cuerpo_ancho, cuerpo_alto)
+        pygame.draw.rect(pantalla, self.color, cuerpo_rect, border_radius=12)
+        # Borde negro 
+        pygame.draw.rect(pantalla, NEGRO, cuerpo_rect, 2, border_radius=12)
+        # CABEZA y VISOR 
+        # Un visor ancho y brillante en la parte superior del cuerpo
+        visor_alto = 14
+        visor_rect = pygame.Rect(cuerpo_rect.left + 4, cuerpo_rect.top + 6, cuerpo_rect.width - 8, visor_alto)
+        pygame.draw.rect(pantalla, color_visor, visor_rect, border_radius=6)
+         #Brillo del visor
+        pygame.draw.line(pantalla, (255, 255, 255), (visor_rect.left + 4, visor_rect.top + 4), (visor_rect.right - 4, visor_rect.top + 4), 2)
+        #ANTENAS
+        # Dos pequeños círculos metálicos en la parte superior
+        pygame.draw.circle(pantalla, color_metal, (cuerpo_rect.left + 8, cuerpo_rect.top + 2), 4)
+        pygame.draw.circle(pantalla, color_metal, (cuerpo_rect.right - 8, cuerpo_rect.top + 2), 4)
+        # Borde negro para las antenas
+        pygame.draw.circle(pantalla, NEGRO, (cuerpo_rect.left + 8, cuerpo_rect.top + 2), 4, 1)
+        pygame.draw.circle(pantalla, NEGRO, (cuerpo_rect.right - 8, cuerpo_rect.top + 2), 4, 1)
