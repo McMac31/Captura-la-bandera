@@ -42,12 +42,15 @@ def generar_obstaculos():
     # Creamos 10 obstáculos aleatorios
     for _ in range(10): 
         intentos = 0
-        while intentos < 50: # Evitar bucle infinito
-            w = random.randint(40, 150) # Ancho aleatorio
-            h = random.randint(40, 150) # Alto aleatorio
-            x = random.randint(0, ANCHO - w)
-            y = random.randint(0, ALTO - h)
+        while intentos < 100: # Evitar bucle infinito
+            w = random.randint(40, 100) # Ancho aleatorio
+            h = random.randint(40, 100) # Alto aleatorio
+            x = random.randint(50, ANCHO - 150)
+            y = random.randint(50, ALTO - 150)
             muro = pygame.Rect(x, y, w, h)
+
+            # Margen de seguridad para que el jugador siempre pueda pasar (40px es el tamaño del jugador)
+            muro_con_margen = muro.inflate(60, 60)
             
             # NO chocar con la bandera
             if muro.colliderect(zona_bandera):
@@ -55,10 +58,15 @@ def generar_obstaculos():
                 continue
                 
             # NO chocar con ninguna base
-            if (muro.colliderect(BASE_ROJA) or 
-                muro.colliderect(BASE_AZUL) or 
-                muro.colliderect(BASE_AMARILLA) or 
-                muro.colliderect(BASE_VERDE)):
+            if (muro.colliderect(BASE_ROJA.inflate(40,40)) or 
+                muro.colliderect(BASE_AZUL.inflate(40,40)) or 
+                muro.colliderect(BASE_AMARILLA.inflate(40,40)) or 
+                muro.colliderect(BASE_VERDE.inflate(40,40))):
+                intentos += 1
+                continue
+
+            #No chocar con otros muros ya existentes 
+            if any(muro_con_margen.colliderect(m) for m in lista):
                 intentos += 1
                 continue
                 

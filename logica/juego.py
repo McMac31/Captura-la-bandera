@@ -152,6 +152,8 @@ class Juego:
                         if id_anotador in self.jugadores:
                             self.jugadores[id_anotador].puntos = mensaje["puntos"]
                     # Reiniciamos la ronda
+                    if "nuevo_mapa" in mensaje:
+                        self.obstaculos = [pygame.Rect(x, y, w, h) for (x, y, w, h) in mensaje["nuevo_mapa"]]
                     self.resetear_ronda()
                     hubo_reset = True
                     continue 
@@ -272,11 +274,18 @@ class Juego:
 
     # Dibujamos todos los elementos en la pantalla
     def dibujar(self):
-        self.pantalla.fill(BLANCO)
+        self.pantalla.fill((20, 20, 35))
+        # Dibujar rejilla de fondo (Grid)
+        for x in range(0, ANCHO, 40):
+            pygame.draw.line(self.pantalla, (30, 30, 50), (x, 0), (x, ALTO))
+        for y in range(0, ALTO, 40):
+            pygame.draw.line(self.pantalla, (30, 30, 50), (0, y), (ANCHO, y))
         
         # Dibujar Obstáculos
         for muro in self.obstaculos:
-            pygame.draw.rect(self.pantalla, GRIS, muro)
+            pygame.draw.rect(self.pantalla, (15, 52, 96), muro)
+            pygame.draw.rect(self.pantalla, (233, 69, 96), muro, 2)
+            
 
         # Dibujo las 4 Bases 
         pygame.draw.rect(self.pantalla, COLOR_BASE_ROJA, BASE_ROJA)

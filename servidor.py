@@ -83,7 +83,13 @@ class Servidor:
                             # Si hay un reset
                             elif data["evento"] == "RESET":
                                 self.dueno_bandera = None
+                                # REGENERAR MAPA DINÁMICO
+                                nuevos_obstaculos = generar_obstaculos()
+                                self.mapa_obstaculos = [(m.x, m.y, m.w, m.h) for m in nuevos_obstaculos]
+                                # Enviamos el RESET y el NUEVO MAPA a todos
+                                data['nuevo_mapa'] = self.mapa_obstaculos
                                 self.broadcast_estado(id_jugador, data)
+                                
 
                         # Si es movimiento normal, retransmitimos
                         elif "posicion" in data:

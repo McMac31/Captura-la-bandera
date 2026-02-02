@@ -1,14 +1,15 @@
 import pygame
 from config import *
-
+import math
 #Clase Bandera
 class Bandera:
     def __init__(self):
         # Inicializamos la bandera
-        self.rect = pygame.Rect(0, 0, 30, 30)
+        self.rect = pygame.Rect(0, 0, 30, 45)
         self.rect.center = (ANCHO // 2, ALTO // 2)
         self.portador = None
         self.capturada = False
+        self.oscilacion = 0
 
     #Funcion para que la bandera vuelva a la posicion inicial
     def reiniciar(self):
@@ -24,7 +25,26 @@ class Bandera:
 
     #Funcion para dibujar la bandera
     def dibujar(self, pantalla):
-        # Usamos VERDE_BANDERA si existe, si no el verde normal
-        color = VERDE_BANDERA if 'VERDE_BANDERA' in globals() else VERDE
-        pygame.draw.rect(pantalla, color, self.rect) #La bandera es verde
-        pygame.draw.rect(pantalla, NEGRO, self.rect, 2) #Borde de la bandera
+        # 1. Dibujamos el Mástil (una línea gris oscura)
+        pygame.draw.line(pantalla, (100, 100, 100), 
+                         (self.rect.left, self.rect.bottom), 
+                         (self.rect.left, self.rect.top), 3)
+        
+        # 2. Calculamos el movimiento de la tela con una onda seno
+        offset = math.sin(self.oscilacion) * 5
+        
+        # 3. Dibujamos la Tela (un polígono triangular que vibra)
+        puntos_tela = [
+            (self.rect.left, self.rect.top),
+            (self.rect.right + offset, self.rect.top + 12),
+            (self.rect.left, self.rect.top + 25)
+        ]
+        
+        # Usamos el color configurado o el verde por defecto
+        color = VERDE_BANDERA if 'VERDE_BANDERA' in globals() else (50, 200, 50)
+        
+        pygame.draw.polygon(pantalla, color, puntos_tela)
+        # Un pequeño borde negro para que resalte
+        pygame.draw.polygon(pantalla, NEGRO, puntos_tela, 2)
+        
+       
