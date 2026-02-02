@@ -13,6 +13,7 @@ class Juego:
     def __init__(self,nombre_jugador,email_jugador,id_db):
         # Inicializamos el juego
         pygame.init()
+        pygame.mixer.init() #Inicializamos musica
         self.pantalla = pygame.display.set_mode((ANCHO, ALTO))
         pygame.display.set_caption(TITULO)
         self.reloj = pygame.time.Clock()
@@ -31,6 +32,14 @@ class Juego:
         
         # Cargar obstaculos desde config (por defecto los locales)
         self.obstaculos = OBSTACULOS
+        try: 
+            self.sonido_punto=pygame.mixer.Sound("musica/Puntuar.mp3") #Indicamos la ruta del sonido
+            self.sonido_muerte=pygame.mixer.Sound("musica/Muerte.mp3") #Indicamos la ruta del sonido
+            pygame.mixer.music.load("musica/MusicaJuego.mp3") #Indicamos la ruta de la cancion
+            pygame.mixer.music.set_volume(0.4) #Volumen al 40%, solo acepta float
+            pygame.mixer.music.play(-1) #bucle de musica
+        except Exception as e:
+            print(f"Error cargando sonidos {e}")
 
         if self.red.conectar():
             print("Conectado al servidor de juego.")
@@ -216,6 +225,7 @@ class Juego:
                         if j1 != j2:
                             # Si robo a alguien RESETEO
                             if j1.robar(j2, self.bandera):
+                                self.sonido_muerte.play()
                                 self.red.enviar({'id': self.mi_id, 'evento': 'RESET'})
                                 self.resetear_ronda() # Me reseteo
 
@@ -224,6 +234,7 @@ class Juego:
                     # Comprobamos si choco con algun enemigo
                     for enemigo in lista_jugadores:
                         if j1 != enemigo and j1.rect.colliderect(enemigo.rect):
+                            self.sonido_muerte.play()
                             self.red.enviar({'id': self.mi_id, 'evento': 'RESET'})
                             self.resetear_ronda() # Me reseteo al instante
                             break
@@ -248,6 +259,7 @@ class Juego:
                 anoto_punto = True
             # Si anotó, incrementamos puntos y reseteamos ronda
             if anoto_punto:
+                self.sonido_punto.play()
                 portador.puntos += 1
                 print(f"{portador.NombreJugador} con ID: {portador.id} anotó un punto!")
                 self.resetear_ronda()
